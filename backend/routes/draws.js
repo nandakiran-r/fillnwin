@@ -157,4 +157,15 @@ router.get('/export', async (req, res) => {
     }
 });
 
+// Clear all draw history
+router.delete('/', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM draw_history');
+        res.json({ success: true, message: 'All draw history cleared' });
+    } catch (error) {
+        console.error('Clear draw history error:', error);
+        res.status(500).json({ error: 'Failed to clear draw history' });
+    }
+});
+
 export default router;

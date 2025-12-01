@@ -94,8 +94,15 @@ export const addDrawToHistory = async (winner) => {
 };
 
 export const clearDrawHistory = async () => {
-    // Not implemented in backend yet
-    console.warn('clearDrawHistory not implemented');
+    try {
+        const response = await fetch(`${API_BASE_URL}/draws`, {
+            method: 'DELETE'
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error clearing draw history:', error);
+        return { success: false, error: error.message };
+    }
 };
 
 // Remove participant after they've been selected

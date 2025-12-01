@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { validateCSVFile, downloadSampleCSV } from '../utils/csvParser';
-import { getParticipants, clearParticipants } from '../utils/storage';
+import { getParticipants, clearParticipants, clearDrawHistory } from '../utils/storage';
 
 const Upload = () => {
     const [participants, setParticipants] = useState([]);
@@ -91,10 +91,30 @@ const Upload = () => {
     };
 
     const handleClearAll = async () => {
-        if (window.confirm('Are you sure you want to clear all participants? This cannot be undone.')) {
-            await clearParticipants();
-            setParticipants([]);
-            setMessage({ type: 'info', text: 'All participants cleared' });
+        if (window.confirm('Are you sure you want to clear ALL data (participants AND draw history)? This cannot be undone.')) {
+            try {
+                console.log('Clearing all data...');
+                
+                // Clear both participants and draw history
+                const participantsResult = await clearParticipants();
+                console.log('Participants cleared:', participantsResult);
+                
+                const drawHistoryResult = await clearDrawHistory();
+                console.log('Draw history cleared:', drawHistoryResult);
+                
+                // Update UI
+                setParticipants([]);
+                
+                // Check if both operations succeeded
+                if (participantsResult?.success && drawHistoryResult?.success) {
+                    setMessage({ type: 'success', text: 'All participants and draw history cleared successfully' });
+                } else {
+                    setMessage({ type: 'error', text: 'Some data may not have been cleared. Check console for details.' });
+                }
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                setMessage({ type: 'error', text: `Failed to clear data: ${error.message}` });
+            }
         }
     };
 

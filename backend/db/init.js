@@ -2,6 +2,7 @@ import pool from '../config/database.js';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import bcrypt from 'bcryptjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,14 +11,52 @@ async function initDatabase() {
     try {
         console.log('🔄 Initializing database...');
 
-        // Read schema file
+        // 1. Execute Schema
+        console.log('   Running schema...');
         const schemaPath = join(__dirname, 'schema.sql');
         const schema = fs.readFileSync(schemaPath, 'utf8');
-
-        // Execute schema
         await pool.query(schema);
+        console.log('   ✅ Schema executed');
 
-        console.log('✅ Database initialized successfully!');
+        // 2. Fix Foreign Key
+        console.log('   Fixing foreign key constraints...');
+        await pool.query(`
+            ALTER TABLE draw_history 
+            DROP CONSTRAINT IF EXISTS draw_history_participant_id_fkey;
+        `);
+        await pool.query(`
+            ALTER TABLE draw_history 
+            ADD CONSTRAINT draw_history_participant_id_fkey 
+            FOREIGN KEY (participant_id) 
+            REFERENCES participants(id) 
+            ON DELETE CASCADE;
+        `);
+        console.log('   ✅ Foreign key constraints updated');
+
+        // 3. Seed Admin User
+        console.log('   Seeding admin user...');
+        const checkUser = await pool.query(
+            'SELECT * FROM users WHERE username = $1',
+            ['admin']
+        );
+
+        if (checkUser.rows.length > 0) {
+            console.log('   ℹ️  Admin user already exists');
+        } else {
+            const password = 'fillnwin2025';
+            const saltRounds = 10;
+            const passwordHash = await bcrypt.hash(password, saltRounds);
+
+            await pool.query(
+                'INSERT INTO users (username, password_hash) VALUES ($1, $2)',
+                ['admin', passwordHash]
+            );
+            console.log('   ✅ Admin user created successfully!');
+            console.log('      Username: admin');
+            console.log('      Password: fillnwin2025');
+        }
+
+        console.log('✅ Database initialization completed successfully!');
         process.exit(0);
     } catch (error) {
         console.error('❌ Database initialization failed:', error);

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS participants (
 -- Table for storing draw history (winners)
 CREATE TABLE IF NOT EXISTS draw_history (
     id SERIAL PRIMARY KEY,
-    participant_id INTEGER REFERENCES participants(id),
+    participant_id INTEGER REFERENCES participants(id) ON DELETE CASCADE,
     full_name VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     bill_receipt VARCHAR(100),
