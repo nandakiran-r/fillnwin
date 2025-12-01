@@ -5,14 +5,16 @@ import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Wrapper component to prevent infinite re-renders
+const LoginRoute = () => {
+  return isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />;
+};
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />}
-        />
+        <Route path="/" element={<LoginRoute />} />
 
         <Route
           path="/dashboard"

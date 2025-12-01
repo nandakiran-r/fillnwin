@@ -6,8 +6,11 @@ const Navbar = () => {
     const location = useLocation();
 
     const handleLogout = () => {
-        logout();
-        navigate('/');
+        const result = logout();
+        if (result.success) {
+            // Use replace to avoid navigation stack issues
+            navigate('/', { replace: true });
+        }
     };
 
     return (
