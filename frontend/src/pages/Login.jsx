@@ -13,17 +13,19 @@ const Login = () => {
         setError('');
         setLoading(true);
 
-        // Simulate a small delay for better UX
-        setTimeout(() => {
-            const result = login(credentials.username, credentials.password);
+        try {
+            const result = await login(credentials.username, credentials.password);
 
             if (result.success) {
                 navigate('/dashboard');
             } else {
                 setError(result.error);
-                setLoading(false);
             }
-        }, 500);
+        } catch (error) {
+            setError('Connection error. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

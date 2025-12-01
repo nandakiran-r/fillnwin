@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRouter from './routes/auth.js';
 import participantsRouter from './routes/participants.js';
 import drawsRouter from './routes/draws.js';
 import statsRouter from './routes/stats.js';
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+app.use('/api/auth', authRouter);
 app.use('/api/participants', participantsRouter);
 app.use('/api/draws', drawsRouter);
 app.use('/api/stats', statsRouter);
