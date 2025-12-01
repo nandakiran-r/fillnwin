@@ -94,17 +94,17 @@ const Upload = () => {
         if (window.confirm('Are you sure you want to clear ALL data (participants AND draw history)? This cannot be undone.')) {
             try {
                 console.log('Clearing all data...');
-                
+
                 // Clear both participants and draw history
                 const participantsResult = await clearParticipants();
                 console.log('Participants cleared:', participantsResult);
-                
+
                 const drawHistoryResult = await clearDrawHistory();
                 console.log('Draw history cleared:', drawHistoryResult);
-                
+
                 // Update UI
                 setParticipants([]);
-                
+
                 // Check if both operations succeeded
                 if (participantsResult?.success && drawHistoryResult?.success) {
                     setMessage({ type: 'success', text: 'All participants and draw history cleared successfully' });
@@ -197,8 +197,7 @@ const Upload = () => {
                         }}>
                             <strong style={{ color: 'var(--festive-gold)' }}>CSV Format:</strong><br />
                             <strong>Required columns:</strong> Full Name, Phone, Divisonal Office, Ticket Number<br />
-                            <strong>Optional columns:</strong> Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time<br />
-                            Maximum file size: 5MB
+                            <strong>Optional columns:</strong> Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time
                         </div>
                     </div>
 

@@ -78,10 +78,6 @@ export const validateCSVFile = (file) => {
         return { valid: false, error: 'Please upload a CSV file' };
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        return { valid: false, error: 'File size must be less than 5MB' };
-    }
-
     return { valid: true };
 };
 
