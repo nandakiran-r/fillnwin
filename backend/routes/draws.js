@@ -168,4 +168,102 @@ router.delete('/', async (req, res) => {
     }
 });
 
+// Mega Draw: Select winners for 1st (3), 2nd (9), and 3rd (75) prizes
+router.post('/mega', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // 1. Get all eligible participants (not drawn yet)
+        const participantsResult = await client.query(
+            'SELECT * FROM participants WHERE is_drawn = FALSE'
+        );
+        let participants = participantsResult.rows;
+
+        // Check if we have enough participants
+        const requiredParticipants = 3 + 9 + 75;
+        if (participants.length < requiredParticipants) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({
+                error: `Not enough participants. Required: ${requiredParticipants}, Available: ${participants.length}`
+            });
+        }
+
+        // 2. Shuffle participants
+        for (let i = participants.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [participants[i], participants[j]] = [participants[j], participants[i]];
+        }
+
+        // 3. Select winners
+        const firstPrizeWinners = participants.slice(0, 3);
+        const secondPrizeWinners = participants.slice(3, 12); // 3 + 9 = 12
+        const thirdPrizeWinners = participants.slice(12, 87); // 12 + 75 = 87
+
+        const allWinners = [
+            ...firstPrizeWinners.map(w => ({ ...w, rank: '1st Prize' })),
+            ...secondPrizeWinners.map(w => ({ ...w, rank: '2nd Prize' })),
+            ...thirdPrizeWinners.map(w => ({ ...w, rank: '3rd Prize' }))
+        ];
+
+        // 4. Update database
+        const now = new Date();
+        const drawDate = now.toLocaleDateString();
+        const drawTime = now.toLocaleTimeString();
+
+        for (const winner of allWinners) {
+            // Mark as drawn
+            await client.query(
+                'UPDATE participants SET is_drawn = TRUE WHERE id = $1',
+                [winner.id]
+            );
+
+            // Add to history
+            await client.query(`
+                INSERT INTO draw_history (
+                    participant_id, full_name, phone, bill_receipt, 
+                    vehicle_registration_number, vehicle_type, sap_code,
+                    retail_outlet_name, rsa, divisonal_office,
+                    submission_date_time, ticket_number, draw_date, draw_time, prize_rank
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            `, [
+                winner.id,
+                winner.full_name,
+                winner.phone,
+                winner.bill_receipt || '',
+                winner.vehicle_registration_number || '',
+                winner.vehicle_type || '',
+                winner.sap_code || '',
+                winner.retail_outlet_name || '',
+                winner.rsa || '',
+                winner.divisonal_office,
+                winner.submission_date_time || '',
+                winner.ticket_number,
+                drawDate,
+                drawTime,
+                winner.rank
+            ]);
+        }
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            winners: {
+                first: firstPrizeWinners,
+                second: secondPrizeWinners,
+                third: thirdPrizeWinners
+            },
+            totalWinners: allWinners.length
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Mega draw error:', error);
+        res.status(500).json({ error: 'Failed to conduct mega draw' });
+    } finally {
+        client.release();
+    }
+});
+
 export default router;

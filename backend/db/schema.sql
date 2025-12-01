@@ -44,7 +44,8 @@ CREATE TABLE IF NOT EXISTS draw_history (
     ticket_number VARCHAR(100) NOT NULL,
     draw_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     draw_date VARCHAR(50),
-    draw_time VARCHAR(50)
+    draw_time VARCHAR(50),
+    prize_rank VARCHAR(50)
 );
 
 -- Create indexes for better query performance
@@ -55,3 +56,6 @@ CREATE INDEX IF NOT EXISTS idx_draw_history_timestamp ON draw_history(draw_times
 -- Fix foreign key constraint (ensure it exists with correct name and cascade)
 ALTER TABLE draw_history DROP CONSTRAINT IF EXISTS draw_history_participant_id_fkey;
 ALTER TABLE draw_history ADD CONSTRAINT draw_history_participant_id_fkey FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE;
+
+-- Add prize_rank column if it doesn't exist (for existing databases)
+ALTER TABLE draw_history ADD COLUMN IF NOT EXISTS prize_rank VARCHAR(50);

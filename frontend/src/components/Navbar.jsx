@@ -68,6 +68,21 @@ const Navbar = () => {
                         📤 Upload
                     </Link>
 
+                    <Link
+                        to="/mega-draw"
+                        className={`btn btn-outline ${location.pathname === '/mega-draw' ? 'active' : ''}`}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            fontSize: '0.9rem',
+                            ...(location.pathname === '/mega-draw' && {
+                                background: 'var(--festive-gold)',
+                                color: 'var(--deep-red)'
+                            })
+                        }}
+                    >
+                        🌟 Mega Draw
+                    </Link>
+
                     <button
                         onClick={handleLogout}
                         className="btn btn-primary"
