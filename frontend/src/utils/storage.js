@@ -1,86 +1,137 @@
-// LocalStorage management utilities for FillNWin
+// API utilities for FillNWin backend integration
 
-const PARTICIPANTS_KEY = 'fillnwin_participants';
-const DRAW_HISTORY_KEY = 'fillnwin_draw_history';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // Participants Management
-export const saveParticipants = (participants) => {
-    try {
-        localStorage.setItem(PARTICIPANTS_KEY, JSON.stringify(participants));
-        return { success: true };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
+export const saveParticipants = async (participants) => {
+    // This is handled by the CSV upload endpoint
+    console.warn('saveParticipants is deprecated, use uploadCSV instead');
+    return { success: true };
 };
 
-export const getParticipants = () => {
+export const getParticipants = async () => {
     try {
-        const data = localStorage.getItem(PARTICIPANTS_KEY);
-        return data ? JSON.parse(data) : [];
+        const response = await fetch(`${API_BASE_URL}/participants`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch participants');
+        }
+        const data = await response.json();
+
+        // Transform snake_case to camelCase for frontend compatibility
+        return data.map(p => ({
+            id: p.id,
+            fullName: p.full_name,
+            phone: p.phone,
+            billReceipt: p.bill_receipt,
+            vehicleRegistrationNumber: p.vehicle_registration_number,
+            vehicleType: p.vehicle_type,
+            sapCode: p.sap_code,
+            retailOutletName: p.retail_outlet_name,
+            rsa: p.rsa,
+            divisonalOffice: p.divisonal_office,
+            submissionDateTime: p.submission_date_time,
+            ticketNumber: p.ticket_number,
+            uploadedAt: p.uploaded_at
+        }));
     } catch (error) {
         console.error('Error retrieving participants:', error);
         return [];
     }
 };
 
-export const clearParticipants = () => {
-    localStorage.removeItem(PARTICIPANTS_KEY);
-};
-
-// Draw History Management
-export const saveDrawHistory = (history) => {
+export const clearParticipants = async () => {
     try {
-        localStorage.setItem(DRAW_HISTORY_KEY, JSON.stringify(history));
-        return { success: true };
+        const response = await fetch(`${API_BASE_URL}/participants`, {
+            method: 'DELETE'
+        });
+        return await response.json();
     } catch (error) {
+        console.error('Error clearing participants:', error);
         return { success: false, error: error.message };
     }
 };
 
-export const getDrawHistory = () => {
+// Draw History Management
+export const saveDrawHistory = async (history) => {
+    // This is deprecated, use addDrawToHistory instead
+    console.warn('saveDrawHistory is deprecated');
+    return { success: true };
+};
+
+export const getDrawHistory = async () => {
     try {
-        const data = localStorage.getItem(DRAW_HISTORY_KEY);
-        return data ? JSON.parse(data) : [];
+        const response = await fetch(`${API_BASE_URL}/draws`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch draw history');
+        }
+        return await response.json();
     } catch (error) {
         console.error('Error retrieving draw history:', error);
         return [];
     }
 };
 
-export const addDrawToHistory = (winner) => {
-    const history = getDrawHistory();
-    const newEntry = {
-        id: Date.now(),
-        winner,
-        timestamp: new Date().toISOString(),
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString()
-    };
-    history.unshift(newEntry);
-    saveDrawHistory(history);
-    return newEntry;
+export const addDrawToHistory = async (winner) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/draws`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ winner })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add winner to history');
+        }
+
+        const data = await response.json();
+        return data.entry;
+    } catch (error) {
+        console.error('Error adding draw to history:', error);
+        throw error;
+    }
 };
 
-export const clearDrawHistory = () => {
-    localStorage.removeItem(DRAW_HISTORY_KEY);
+export const clearDrawHistory = async () => {
+    // Not implemented in backend yet
+    console.warn('clearDrawHistory not implemented');
 };
 
 // Remove participant after they've been selected
-export const removeParticipant = (participantId) => {
-    const participants = getParticipants();
-    const updated = participants.filter(p => p.id !== participantId);
-    saveParticipants(updated);
-    return updated;
+export const removeParticipant = async (participantId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/participants/${participantId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to remove participant');
+        }
+
+        // Return updated list of participants
+        return await getParticipants();
+    } catch (error) {
+        console.error('Error removing participant:', error);
+        return [];
+    }
 };
 
 // Get statistics
-export const getStats = () => {
-    const participants = getParticipants();
-    const history = getDrawHistory();
-
-    return {
-        totalParticipants: participants.length,
-        totalDraws: history.length,
-        remainingParticipants: participants.length
-    };
+export const getStats = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/stats`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch statistics');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error retrieving stats:', error);
+        return {
+            totalParticipants: 0,
+            totalDraws: 0,
+            remainingParticipants: 0
+        };
+    }
 };
+

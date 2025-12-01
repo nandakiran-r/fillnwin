@@ -14,30 +14,30 @@ const Dashboard = () => {
         loadData();
     }, []);
 
-    const loadData = () => {
-        const p = getParticipants();
-        const h = getDrawHistory();
-        const s = getStats();
+    const loadData = async () => {
+        const p = await getParticipants();
+        const h = await getDrawHistory();
+        const s = await getStats();
 
         setParticipants(p);
         setDrawHistory(h);
         setStats(s);
     };
 
-    const handleWinnerSelected = (winner) => {
+    const handleWinnerSelected = async (winner) => {
         // Add to history
-        addDrawToHistory(winner);
+        await addDrawToHistory(winner);
 
         // Remove from participants
-        removeParticipant(winner.id);
+        await removeParticipant(winner.id);
 
         // Update state
         setCurrentWinner(winner);
         setShowWinnerModal(true);
 
         // Reload data
-        setTimeout(() => {
-            loadData();
+        setTimeout(async () => {
+            await loadData();
         }, 500);
     };
 
@@ -46,40 +46,31 @@ const Dashboard = () => {
         setCurrentWinner(null);
     };
 
-    const exportWinners = () => {
+    const exportWinners = async () => {
         if (drawHistory.length === 0) {
             alert('No winners to export');
             return;
         }
 
-        const csvContent = [
-            ['Full Name', 'Phone', 'Bill Receipt', 'Vehicle Registration Number', 'Vehicle Type', 'SAP Code', 'Retail Outlet Name', 'RSA', 'Divisonal Office', 'Submission Date & Time', 'Ticket Number', 'Draw Date', 'Draw Time'].join(','),
-            ...drawHistory.map(entry => [
-                entry.winner.fullName,
-                entry.winner.phone,
-                entry.winner.billReceipt || '',
-                entry.winner.vehicleRegistrationNumber || '',
-                entry.winner.vehicleType || '',
-                entry.winner.sapCode || '',
-                entry.winner.retailOutletName || '',
-                entry.winner.rsa || '',
-                entry.winner.divisonalOffice,
-                entry.winner.submissionDateTime || '',
-                entry.winner.ticketNumber,
-                entry.date,
-                entry.time
-            ].join(','))
-        ].join('\n');
+        try {
+            const response = await fetch('http://localhost:5000/api/draws/export');
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
 
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `fillnwin_winners_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `fillnwin_winners_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('Failed to export winners');
+        }
     };
 
     return (

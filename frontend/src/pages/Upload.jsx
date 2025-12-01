@@ -1,14 +1,23 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { parseCSV, validateCSVFile, downloadSampleCSV } from '../utils/csvParser';
-import { saveParticipants, getParticipants, clearParticipants } from '../utils/storage';
+import { validateCSVFile, downloadSampleCSV } from '../utils/csvParser';
+import { getParticipants, clearParticipants } from '../utils/storage';
 
 const Upload = () => {
-    const [participants, setParticipants] = useState(getParticipants());
+    const [participants, setParticipants] = useState([]);
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState(null);
     const fileInputRef = useRef(null);
+
+    // Load participants on mount
+    useEffect(() => {
+        const loadParticipants = async () => {
+            const data = await getParticipants();
+            setParticipants(data);
+        };
+        loadParticipants();
+    }, []);
 
     const handleDrag = (e) => {
         e.preventDefault();
@@ -48,16 +57,30 @@ const Upload = () => {
         setUploading(true);
 
         try {
-            const result = await parseCSV(file);
+            // Create FormData and send to backend
+            const formData = new FormData();
+            formData.append('file', file);
 
-            if (result.success) {
-                // Save to localStorage
-                saveParticipants(result.participants);
-                setParticipants(result.participants);
+            const response = await fetch('http://localhost:5000/api/participants/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Reload participants
+                const updatedParticipants = await getParticipants();
+                setParticipants(updatedParticipants);
 
                 setMessage({
                     type: 'success',
-                    text: `✅ Successfully uploaded ${result.count} participants!`
+                    text: `✅ ${result.message}`
+                });
+            } else {
+                setMessage({
+                    type: 'error',
+                    text: result.error || 'Upload failed'
                 });
             }
         } catch (error) {
@@ -67,9 +90,9 @@ const Upload = () => {
         }
     };
 
-    const handleClearAll = () => {
+    const handleClearAll = async () => {
         if (window.confirm('Are you sure you want to clear all participants? This cannot be undone.')) {
-            clearParticipants();
+            await clearParticipants();
             setParticipants([]);
             setMessage({ type: 'info', text: 'All participants cleared' });
         }
