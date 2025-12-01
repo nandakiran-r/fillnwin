@@ -159,7 +159,8 @@ const Upload = () => {
                             color: 'var(--text-secondary)'
                         }}>
                             <strong style={{ color: 'var(--festive-gold)' }}>CSV Format:</strong><br />
-                            Required columns: name, phone, email, coupon_code<br />
+                            <strong>Required columns:</strong> Full Name, Phone, Divisonal Office, Ticket Number<br />
+                            <strong>Optional columns:</strong> Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time<br />
                             Maximum file size: 5MB
                         </div>
                     </div>

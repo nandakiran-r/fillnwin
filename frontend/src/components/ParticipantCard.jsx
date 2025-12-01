@@ -12,7 +12,7 @@ const ParticipantCard = ({ participant, showActions = false, onRemove }) => {
                     marginBottom: '0.25rem',
                     color: 'var(--festive-gold)'
                 }}>
-                    {participant.name}
+                    {participant.fullName}
                 </h4>
                 <p style={{
                     fontSize: '0.9rem',
@@ -21,17 +21,34 @@ const ParticipantCard = ({ participant, showActions = false, onRemove }) => {
                 }}>
                     📞 {participant.phone}
                 </p>
-                {participant.email && (
+                <p style={{
+                    fontSize: '0.9rem',
+                    color: 'var(--text-muted)',
+                    margin: '0.25rem 0'
+                }}>
+                    🏢 {participant.divisonalOffice}
+                </p>
+                {participant.vehicleType && (
                     <p style={{
-                        fontSize: '0.9rem',
+                        fontSize: '0.85rem',
                         color: 'var(--text-muted)',
                         margin: '0.25rem 0'
                     }}>
-                        ✉️ {participant.email}
+                        🚗 {participant.vehicleType}
+                        {participant.vehicleRegistrationNumber && ` - ${participant.vehicleRegistrationNumber}`}
+                    </p>
+                )}
+                {participant.retailOutletName && (
+                    <p style={{
+                        fontSize: '0.85rem',
+                        color: 'var(--text-muted)',
+                        margin: '0.25rem 0'
+                    }}>
+                        🏪 {participant.retailOutletName}
                     </p>
                 )}
                 <div className="badge badge-gold" style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
-                    {participant.couponCode}
+                    {participant.ticketNumber}
                 </div>
             </div>
 

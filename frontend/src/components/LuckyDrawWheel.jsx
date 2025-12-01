@@ -66,7 +66,7 @@ const LuckyDrawWheel = ({ participants, onWinnerSelected }) => {
                         color: 'var(--festive-gold)',
                         textShadow: '0 0 20px rgba(255, 215, 0, 0.5)'
                     }}>
-                        {participants[currentIndex].name}
+                        {participants[currentIndex].fullName}
                     </div>
                 )}
 
@@ -94,13 +94,16 @@ const LuckyDrawWheel = ({ participants, onWinnerSelected }) => {
                             backgroundClip: 'text',
                             marginBottom: '1rem'
                         }}>
-                            {winner.name}
+                            {winner.fullName}
                         </div>
                         <div style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
                             📞 {winner.phone}
                         </div>
+                        <div style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                            🏢 {winner.divisonalOffice}
+                        </div>
                         <div className="badge badge-gold" style={{ marginTop: '1rem', fontSize: '1rem' }}>
-                            {winner.couponCode}
+                            {winner.ticketNumber}
                         </div>
                     </div>
                 )}

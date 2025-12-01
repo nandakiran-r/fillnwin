@@ -54,12 +54,19 @@ const Dashboard = () => {
         }
 
         const csvContent = [
-            ['Name', 'Phone', 'Email', 'Coupon Code', 'Date', 'Time'].join(','),
+            ['Full Name', 'Phone', 'Bill Receipt', 'Vehicle Registration Number', 'Vehicle Type', 'SAP Code', 'Retail Outlet Name', 'RSA', 'Divisonal Office', 'Submission Date & Time', 'Ticket Number', 'Draw Date', 'Draw Time'].join(','),
             ...drawHistory.map(entry => [
-                entry.winner.name,
+                entry.winner.fullName,
                 entry.winner.phone,
-                entry.winner.email || '',
-                entry.winner.couponCode,
+                entry.winner.billReceipt || '',
+                entry.winner.vehicleRegistrationNumber || '',
+                entry.winner.vehicleType || '',
+                entry.winner.sapCode || '',
+                entry.winner.retailOutletName || '',
+                entry.winner.rsa || '',
+                entry.winner.divisonalOffice,
+                entry.winner.submissionDateTime || '',
+                entry.winner.ticketNumber,
                 entry.date,
                 entry.time
             ].join(','))
@@ -155,19 +162,17 @@ const Dashboard = () => {
                                     }}>
                                         <div>
                                             <h4 style={{ fontSize: '1.1rem', color: 'var(--festive-gold)', marginBottom: '0.25rem' }}>
-                                                🏆 {entry.winner.name}
+                                                🏆 {entry.winner.fullName}
                                             </h4>
                                             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.25rem 0' }}>
                                                 📞 {entry.winner.phone}
                                             </p>
-                                            {entry.winner.email && (
-                                                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.25rem 0' }}>
-                                                    ✉️ {entry.winner.email}
-                                                </p>
-                                            )}
+                                            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.25rem 0' }}>
+                                                🏢 {entry.winner.divisonalOffice}
+                                            </p>
                                         </div>
                                         <div className="badge badge-gold">
-                                            {entry.winner.couponCode}
+                                            {entry.winner.ticketNumber}
                                         </div>
                                     </div>
                                     <div style={{
@@ -204,18 +209,16 @@ const Dashboard = () => {
                                 backgroundClip: 'text',
                                 marginBottom: '1rem'
                             }}>
-                                {currentWinner.name}
+                                {currentWinner.fullName}
                             </div>
                             <div style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                                 📞 {currentWinner.phone}
                             </div>
-                            {currentWinner.email && (
-                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                                    ✉️ {currentWinner.email}
-                                </div>
-                            )}
+                            <div style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                                🏢 {currentWinner.divisonalOffice}
+                            </div>
                             <div className="badge badge-gold" style={{ fontSize: '1.2rem', padding: '0.5rem 1.5rem' }}>
-                                {currentWinner.couponCode}
+                                {currentWinner.ticketNumber}
                             </div>
 
                             <button
