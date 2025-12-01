@@ -88,6 +88,15 @@ const Dashboard = () => {
 
             <div className="container" style={{ marginTop: '2rem' }}>
                 <div className="text-center" style={{ marginBottom: '2rem' }}>
+                    <img
+                        src="/indian-oil-logo.png"
+                        alt="Indian Oil Logo"
+                        style={{
+                            height: '80px',
+                            marginBottom: '1rem',
+                            filter: 'drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3))'
+                        }}
+                    />
                     <h1>🎄 FillNWin Dashboard</h1>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginTop: '0.5rem' }}>
                         Christmas New Year Bonanza Lucky Draw

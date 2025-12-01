@@ -55,6 +55,15 @@ const Login = () => {
                 zIndex: 1
             }}>
                 <div className="text-center" style={{ marginBottom: '2rem' }}>
+                    <img
+                        src="/indian-oil-logo.png"
+                        alt="Indian Oil Logo"
+                        style={{
+                            height: '80px',
+                            marginBottom: '1rem',
+                            filter: 'drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3))'
+                        }}
+                    />
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>
                         🎄 FillNWin
                     </h1>
