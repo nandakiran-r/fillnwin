@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS participants (
 -- Table for storing draw history (winners)
 CREATE TABLE IF NOT EXISTS draw_history (
     id SERIAL PRIMARY KEY,
-    participant_id INTEGER REFERENCES participants(id) ON DELETE CASCADE,
+    participant_id INTEGER CONSTRAINT draw_history_participant_id_fkey REFERENCES participants(id) ON DELETE CASCADE,
     full_name VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     bill_receipt VARCHAR(100),
@@ -51,3 +51,7 @@ CREATE TABLE IF NOT EXISTS draw_history (
 CREATE INDEX IF NOT EXISTS idx_participants_ticket ON participants(ticket_number);
 CREATE INDEX IF NOT EXISTS idx_participants_drawn ON participants(is_drawn);
 CREATE INDEX IF NOT EXISTS idx_draw_history_timestamp ON draw_history(draw_timestamp);
+
+-- Fix foreign key constraint (ensure it exists with correct name and cascade)
+ALTER TABLE draw_history DROP CONSTRAINT IF EXISTS draw_history_participant_id_fkey;
+ALTER TABLE draw_history ADD CONSTRAINT draw_history_participant_id_fkey FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE;

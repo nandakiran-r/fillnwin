@@ -18,22 +18,7 @@ async function initDatabase() {
         await pool.query(schema);
         console.log('   ✅ Schema executed');
 
-        // 2. Fix Foreign Key
-        console.log('   Fixing foreign key constraints...');
-        await pool.query(`
-            ALTER TABLE draw_history 
-            DROP CONSTRAINT IF EXISTS draw_history_participant_id_fkey;
-        `);
-        await pool.query(`
-            ALTER TABLE draw_history 
-            ADD CONSTRAINT draw_history_participant_id_fkey 
-            FOREIGN KEY (participant_id) 
-            REFERENCES participants(id) 
-            ON DELETE CASCADE;
-        `);
-        console.log('   ✅ Foreign key constraints updated');
-
-        // 3. Seed Admin User
+        // 2. Seed Admin User
         console.log('   Seeding admin user...');
         const checkUser = await pool.query(
             'SELECT * FROM users WHERE username = $1',
