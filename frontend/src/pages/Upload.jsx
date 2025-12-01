@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import { parseCSV, validateCSVFile, downloadSampleCSV } from '../utils/csvParser';
 import { saveParticipants, getParticipants, clearParticipants } from '../utils/storage';
-import ParticipantCard from '../components/ParticipantCard';
 
 const Upload = () => {
     const [participants, setParticipants] = useState(getParticipants());
@@ -76,12 +75,7 @@ const Upload = () => {
         }
     };
 
-    const handleRemoveParticipant = (id) => {
-        const updated = participants.filter(p => p.id !== id);
-        saveParticipants(updated);
-        setParticipants(updated);
-        setMessage({ type: 'info', text: 'Participant removed' });
-    };
+
 
     return (
         <div style={{ minHeight: '100vh', paddingBottom: '2rem' }}>
@@ -200,24 +194,6 @@ const Upload = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Participants List */}
-                {participants.length > 0 && (
-                    <div style={{ marginTop: '2rem' }}>
-                        <h2 style={{ marginBottom: '1rem' }}>Uploaded Participants ({participants.length})</h2>
-
-                        <div className="grid grid-2">
-                            {participants.map((participant) => (
-                                <ParticipantCard
-                                    key={participant.id}
-                                    participant={participant}
-                                    showActions
-                                    onRemove={handleRemoveParticipant}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

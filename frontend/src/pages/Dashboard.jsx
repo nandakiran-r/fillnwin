@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import LuckyDrawWheel from '../components/LuckyDrawWheel';
-import ParticipantCard from '../components/ParticipantCard';
 import { getParticipants, removeParticipant, getDrawHistory, addDrawToHistory, getStats } from '../utils/storage';
 
 const Dashboard = () => {
