@@ -1,13 +1,12 @@
 import express from 'express';
 import multer from 'multer';
 import csvParser from 'csv-parser';
-import fs from 'fs';
 import pool from '../config/database.js';
 
 const router = express.Router();
 
-// Configure multer for file uploads
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for file uploads (in-memory for Vercel serverless)
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Upload CSV and parse participants
 router.post('/upload', upload.single('file'), async (req, res) => {
@@ -19,8 +18,11 @@ router.post('/upload', upload.single('file'), async (req, res) => {
         const participants = [];
         const errors = [];
 
-        // Parse CSV file
-        fs.createReadStream(req.file.path)
+        // Parse CSV file from buffer (in-memory)
+        const { Readable } = await import('stream');
+        const bufferStream = Readable.from(req.file.buffer);
+
+        bufferStream
             .pipe(csvParser())
             .on('data', (row) => {
                 // Validate required fields
@@ -50,9 +52,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
             })
             .on('end', async () => {
                 try {
-                    // Delete uploaded file
-                    fs.unlinkSync(req.file.path);
-
                     if (participants.length === 0) {
                         return res.status(400).json({
                             error: 'No valid participants found in CSV',
@@ -108,7 +107,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
                 }
             })
             .on('error', (error) => {
-                fs.unlinkSync(req.file.path);
+                console.error('CSV parse error:', error);
                 res.status(500).json({ error: 'Failed to parse CSV file' });
             });
     } catch (error) {
