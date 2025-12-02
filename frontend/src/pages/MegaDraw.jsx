@@ -28,7 +28,7 @@ const MegaDraw = () => {
         setError(null);
 
         try {
-            const response = await fetch('http://localhost:5000/api/draws/mega', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/draws/mega`, {
                 method: 'POST',
             });
             const data = await response.json();

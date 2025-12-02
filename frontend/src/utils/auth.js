@@ -1,7 +1,7 @@
 // Authentication utilities for FillNWin Admin with backend integration
 
 const AUTH_TOKEN_KEY = 'fillnwin_auth_token';
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Login with backend API
 export const login = async (username, password) => {
