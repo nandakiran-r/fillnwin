@@ -168,7 +168,7 @@ router.delete('/', async (req, res) => {
     }
 });
 
-// Mega Draw: Select winners for 1st (3), 2nd (9), and 3rd (75) prizes
+// Mega Draw: Select winners for 1st (1), 2nd (3), and 3rd (25) prizes
 router.post('/mega', async (req, res) => {
     const client = await pool.connect();
     try {
@@ -181,7 +181,7 @@ router.post('/mega', async (req, res) => {
         let participants = participantsResult.rows;
 
         // Check if we have enough participants
-        const requiredParticipants = 3 + 9 + 75;
+        const requiredParticipants = 1 + 3 + 25;
         if (participants.length < requiredParticipants) {
             await client.query('ROLLBACK');
             return res.status(400).json({
@@ -196,9 +196,9 @@ router.post('/mega', async (req, res) => {
         }
 
         // 3. Select winners
-        const firstPrizeWinners = participants.slice(0, 3);
-        const secondPrizeWinners = participants.slice(3, 12); // 3 + 9 = 12
-        const thirdPrizeWinners = participants.slice(12, 87); // 12 + 75 = 87
+        const firstPrizeWinners = participants.slice(0, 1);
+        const secondPrizeWinners = participants.slice(1, 4); // 1 + 3 = 4
+        const thirdPrizeWinners = participants.slice(4, 29); // 4 + 25 = 29
 
         const allWinners = [
             ...firstPrizeWinners.map(w => ({ ...w, rank: '1st Prize' })),

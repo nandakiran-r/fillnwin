@@ -20,7 +20,7 @@ const MegaDraw = () => {
     };
 
     const handleMegaDraw = async () => {
-        if (!confirm('Are you sure you want to start the Mega Draw? This will select 87 winners!')) {
+        if (!confirm('Are you sure you want to start the Mega Draw? This will select 29 winners!')) {
             return;
         }
 
@@ -113,20 +113,20 @@ const MegaDraw = () => {
 
                         <button
                             onClick={handleMegaDraw}
-                            disabled={loading || participants.length < 87}
+                            disabled={loading || participants.length < 29}
                             className="btn btn-gold"
                             style={{
                                 fontSize: '1.2rem',
                                 padding: '1rem 3rem',
-                                opacity: (loading || participants.length < 87) ? 0.5 : 1
+                                opacity: (loading || participants.length < 29) ? 0.5 : 1
                             }}
                         >
                             {loading ? 'Running Draw...' : '🚀 Start Mega Draw'}
                         </button>
 
-                        {participants.length < 87 && (
+                        {participants.length < 29 && (
                             <p style={{ marginTop: '1rem', color: '#ff4444', fontSize: '0.9rem' }}>
-                                * Minimum 87 participants required
+                                * Minimum 29 participants required
                             </p>
                         )}
                     </div>
@@ -152,7 +152,7 @@ const MegaDraw = () => {
                                 marginBottom: '1.5rem',
                                 textShadow: '0 0 20px rgba(255, 215, 0, 0.3)'
                             }}>
-                                🥇 1st Prize Winners (3)
+                                🥇 1st Prize Winner (1)
                             </h2>
                             <div className="grid grid-3">
                                 {winners.first.map((w, i) => (
@@ -169,7 +169,7 @@ const MegaDraw = () => {
                                 marginBottom: '1.5rem',
                                 textShadow: '0 0 20px rgba(192, 192, 192, 0.3)'
                             }}>
-                                🥈 2nd Prize Winners (9)
+                                🥈 2nd Prize Winners (3)
                             </h2>
                             <div className="grid grid-3">
                                 {winners.second.map((w, i) => (
@@ -186,7 +186,7 @@ const MegaDraw = () => {
                                 marginBottom: '1.5rem',
                                 textShadow: '0 0 20px rgba(205, 127, 50, 0.3)'
                             }}>
-                                🥉 3rd Prize Winners (75)
+                                🥉 3rd Prize Winners (25)
                             </h2>
                             <div className="grid grid-3">
                                 {winners.third.map((w, i) => (
