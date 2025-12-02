@@ -35,7 +35,12 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 FillNWin Backend API running on port ${PORT}`);
-    console.log(`📡 API URL: http://localhost:${PORT}`);
-});
+// Start server
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 FillNWin Backend API running on port ${PORT}`);
+        console.log(`📡 API URL: http://localhost:${PORT}`);
+    });
+}
+
+export default app;
