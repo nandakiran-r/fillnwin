@@ -342,7 +342,8 @@ const CouponDraw = () => {
                                 <div style={{
                                     overflowY: 'auto',
                                     flex: 1,
-                                    paddingRight: '0.5rem'
+                                    paddingRight: '0.5rem',
+                                    maxHeight: '450px'
                                 }}>
                                     {allWinners.length === 0 ? (
                                         <p style={{
