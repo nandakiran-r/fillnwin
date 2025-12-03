@@ -50,6 +50,22 @@ export const parseCSV = (file) => {
                         return;
                     }
 
+                    // Extract unique SAP codes and store in localStorage
+                    const uniqueSAPCodes = [...new Set(
+                        participants
+                            .map(p => p.sapCode)
+                            .filter(code => code && code.length > 0)
+                    )];
+
+                    // Get existing SAP codes from localStorage
+                    const existingSAPCodes = JSON.parse(localStorage.getItem('SAPCODES') || '[]');
+
+                    // Merge and deduplicate
+                    const allUniqueSAPCodes = [...new Set([...existingSAPCodes, ...uniqueSAPCodes])];
+
+                    // Store back to localStorage
+                    localStorage.setItem('SAPCODES', JSON.stringify(allUniqueSAPCodes));
+
                     resolve({
                         success: true,
                         participants,
@@ -78,6 +94,7 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
         let addedCount = 0;
         let errorCount = 0;
         const errors = [];
+        const sapCodesSet = new Set();
 
         // First pass: count total rows
         Papa.parse(file, {
@@ -123,6 +140,13 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
                                 };
                             }).filter(p => p !== null);
 
+                            // Collect SAP codes from this chunk
+                            chunk.forEach(participant => {
+                                if (participant.sapCode && participant.sapCode.length > 0) {
+                                    sapCodesSet.add(participant.sapCode);
+                                }
+                            });
+
                             // Save chunk to IndexedDB
                             if (chunk.length > 0) {
                                 const result = await IDB.batchAddParticipants(chunk);
@@ -152,6 +176,18 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
                         }
                     },
                     complete: () => {
+                        // Store all unique SAP codes in localStorage
+                        const uniqueSAPCodes = Array.from(sapCodesSet);
+
+                        // Get existing SAP codes from localStorage
+                        const existingSAPCodes = JSON.parse(localStorage.getItem('SAPCODES') || '[]');
+
+                        // Merge and deduplicate
+                        const allUniqueSAPCodes = [...new Set([...existingSAPCodes, ...uniqueSAPCodes])];
+
+                        // Store back to localStorage
+                        localStorage.setItem('SAPCODES', JSON.stringify(allUniqueSAPCodes));
+
                         resolve({
                             success: true,
                             count: addedCount,
