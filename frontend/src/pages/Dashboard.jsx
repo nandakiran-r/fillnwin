@@ -472,79 +472,141 @@ const Dashboard = () => {
                 >
                     <div
                         style={{
-                            background: 'linear-gradient(135deg, #8B0000 0%, #B22222 100%)',
-                            border: '4px solid #FFD700',
-                            borderRadius: '20px',
-                            padding: '3rem 2rem',
-                            maxWidth: '600px',
+                            background: 'linear-gradient(180deg, #1e3a8a 0%, #3b5998 100%)',
+                            border: '3px solid #60a5fa',
+                            borderRadius: '24px',
+                            padding: '2.5rem 2rem',
+                            maxWidth: '500px',
                             width: '90%',
                             textAlign: 'center',
-                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.6)',
                             position: 'relative',
                             overflow: 'hidden'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Confetti effect */}
+                        {/* Top accent stripe */}
                         <div style={{
                             position: 'absolute',
                             top: 0,
                             left: 0,
                             right: 0,
-                            bottom: 0,
-                            background: 'radial-gradient(circle at 50% 50%, rgba(255,215,0,0.1) 0%, transparent 70%)',
-                            pointerEvents: 'none'
+                            height: '6px',
+                            background: 'linear-gradient(90deg, #60a5fa, #93c5fd, #60a5fa)',
+                            backgroundSize: '200% 100%',
+                            animation: 'shimmer 2s linear infinite'
                         }}></div>
 
+                        {/* Indian Oil Logo */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <img
+                                src="/indian-oil-logo.png"
+                                alt="Indian Oil"
+                                style={{
+                                    height: '50px',
+                                    filter: 'drop-shadow(0 2px 8px rgba(255, 255, 255, 0.3))'
+                                }}
+                            />
+                        </div>
+
                         <h2 style={{
-                            fontSize: '3rem',
-                            color: '#FFD700',
-                            marginBottom: '1rem',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                            animation: 'bounce 0.6s ease'
+                            fontSize: '2rem',
+                            color: '#fff',
+                            marginBottom: '0.5rem',
+                            fontWeight: '700',
+                            letterSpacing: '1px',
+                            textTransform: 'uppercase'
                         }}>
-                            CONGRATULATIONS!
+                            Congratulations!
                         </h2>
 
-                        <div style={{
-                            fontSize: '4rem',
-                            color: '#fff',
-                            fontWeight: 'bold',
+                        <p style={{
+                            color: '#bfdbfe',
+                            fontSize: '0.95rem',
                             marginBottom: '2rem',
-                            textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
+                            fontWeight: '500'
                         }}>
-                            🎫 {currentWinner.ticketNumber}
+                            Lucky Draw Winner
+                        </p>
+
+                        {/* Ticket Number Display */}
+                        <div style={{
+                            background: '#fff',
+                            borderRadius: '16px',
+                            padding: '2rem 1.5rem',
+                            marginBottom: '1.5rem',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                        }}>
+                            <div style={{
+                                fontSize: '3.5rem',
+                                fontWeight: 'bold',
+                                color: '#1e3a8a',
+                                fontFamily: 'monospace',
+                                letterSpacing: '3px',
+                                marginBottom: '0.5rem'
+                            }}>
+                                🎫 {currentWinner.ticketNumber}
+                            </div>
                         </div>
 
+                        {/* Winner Details */}
                         <div style={{
-                            background: 'rgba(255, 255, 255, 0.95)',
-                            border: '2px solid #FFD700',
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
                             borderRadius: '12px',
-                            padding: '1.5rem',
-                            marginBottom: '2rem',
+                            padding: '1.25rem',
+                            marginBottom: '1.5rem',
                             textAlign: 'left'
                         }}>
-                            <div style={{ color: '#333', marginBottom: '0.75rem', fontSize: '1.1rem' }}>
-                                📞 <strong>Phone:</strong> {currentWinner.phone}
+                            <div style={{
+                                color: '#fff',
+                                marginBottom: '0.75rem',
+                                fontSize: '1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <span style={{ fontSize: '1.2rem' }}>📞</span>
+                                <span><strong>Phone:</strong> {currentWinner.phone}</span>
                             </div>
-                            <div style={{ color: '#333', marginBottom: '0.75rem', fontSize: '1.1rem' }}>
-                                🏢 <strong>Office:</strong> {currentWinner.divisonalOffice}
+                            <div style={{
+                                color: '#fff',
+                                fontSize: '1rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <span style={{ fontSize: '1.2rem' }}>🏢</span>
+                                <span><strong>Office:</strong> {currentWinner.divisonalOffice}</span>
                             </div>
                         </div>
 
+                        {/* Close Button */}
                         <button
                             onClick={closeModal}
                             style={{
-                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
                                 color: '#000',
-                                padding: '1rem 3rem',
+                                padding: '0.9rem 2.5rem',
                                 border: 'none',
-                                borderRadius: '50px',
+                                borderRadius: '12px',
                                 cursor: 'pointer',
                                 fontSize: '1.1rem',
-                                fontWeight: 'bold',
+                                fontWeight: '700',
                                 width: '100%',
-                                boxShadow: '0 4px 15px rgba(255,215,0,0.4)'
+                                boxShadow: '0 4px 15px rgba(251, 191, 36, 0.4)',
+                                transition: 'all 0.3s ease',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 6px 20px rgba(251, 191, 36, 0.6)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 4px 15px rgba(251, 191, 36, 0.4)';
                             }}
                         >
                             Close
@@ -567,6 +629,11 @@ const Dashboard = () => {
                 @keyframes bounce {
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.1); }
+                }
+
+                @keyframes shimmer {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 200% 50%; }
                 }
             `}</style>
         </div>
