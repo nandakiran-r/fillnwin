@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { validateCSVFile, downloadSampleCSV } from '../utils/csvParser';
+import { validateCSVFile, downloadSampleCSV, parseCSVChunked } from '../utils/csvParser';
 import { getParticipants, clearParticipants, clearDrawHistory } from '../utils/storage';
 
 const Upload = () => {
@@ -8,6 +8,7 @@ const Upload = () => {
     const [dragActive, setDragActive] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState(null);
+    const [uploadProgress, setUploadProgress] = useState(null);
     const fileInputRef = useRef(null);
 
     // Load participants on mount
@@ -47,6 +48,7 @@ const Upload = () => {
 
     const handleFile = async (file) => {
         setMessage(null);
+        setUploadProgress(null);
 
         const validation = validateCSVFile(file);
         if (!validation.valid) {
@@ -57,36 +59,40 @@ const Upload = () => {
         setUploading(true);
 
         try {
-            // Create FormData and send to backend
-            const formData = new FormData();
-            formData.append('file', file);
+            // Use chunked parsing for large files
+            const result = await parseCSVChunked(
+                file,
+                (progress) => {
+                    // Update progress
+                    setUploadProgress({
+                        processed: progress.processed,
+                        total: progress.total,
+                        percentage: progress.percentage,
+                        added: progress.added,
+                        errors: progress.errors
+                    });
+                },
+                1000 // Chunk size: 1000 rows at a time
+            );
 
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/participants/upload`, {
-                method: 'POST',
-                body: formData
+            // Reload participants
+            const updatedParticipants = await getParticipants();
+            setParticipants(updatedParticipants);
+
+            setMessage({
+                type: 'success',
+                text: `✅ Successfully uploaded ${result.count} participants${result.errors ? ` (${result.errors.length} errors)` : ''}`
             });
 
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                // Reload participants
-                const updatedParticipants = await getParticipants();
-                setParticipants(updatedParticipants);
-
-                setMessage({
-                    type: 'success',
-                    text: `✅ ${result.message}`
-                });
-            } else {
-                setMessage({
-                    type: 'error',
-                    text: result.error || 'Upload failed'
-                });
+            // Show errors if any
+            if (result.errors && result.errors.length > 0) {
+                console.warn('Upload errors:', result.errors);
             }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
         } finally {
             setUploading(false);
+            setUploadProgress(null);
         }
     };
 
@@ -118,8 +124,6 @@ const Upload = () => {
         }
     };
 
-
-
     return (
         <div style={{ minHeight: '100vh', paddingBottom: '2rem' }}>
             <Navbar />
@@ -128,7 +132,7 @@ const Upload = () => {
                 <div className="text-center" style={{ marginBottom: '2rem' }}>
                     <h1>📤 Upload Participants</h1>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginTop: '0.5rem' }}>
-                        Upload CSV file with participant data
+                        Upload CSV file with participant data (stored locally in browser)
                     </p>
                 </div>
 
@@ -154,10 +158,11 @@ const Upload = () => {
                                 borderRadius: 'var(--radius-lg)',
                                 padding: '3rem 2rem',
                                 textAlign: 'center',
-                                cursor: 'pointer',
+                                cursor: uploading ? 'not-allowed' : 'pointer',
                                 background: dragActive ? 'rgba(255, 215, 0, 0.1)' : 'rgba(0, 0, 0, 0.2)',
                                 transition: 'all var(--transition-base)',
-                                marginBottom: '1.5rem'
+                                marginBottom: '1.5rem',
+                                opacity: uploading ? 0.6 : 1
                             }}
                         >
                             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
@@ -169,6 +174,32 @@ const Upload = () => {
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                                 or click to browse
                             </p>
+
+                            {/* Progress Bar */}
+                            {uploadProgress && (
+                                <div style={{ marginTop: '1.5rem' }}>
+                                    <div style={{
+                                        background: 'rgba(255, 255, 255, 0.1)',
+                                        borderRadius: '10px',
+                                        height: '8px',
+                                        overflow: 'hidden',
+                                        marginBottom: '0.5rem'
+                                    }}>
+                                        <div style={{
+                                            background: 'linear-gradient(90deg, var(--festive-gold), var(--crimson-red))',
+                                            height: '100%',
+                                            width: `${uploadProgress.percentage}%`,
+                                            transition: 'width 0.3s ease'
+                                        }} />
+                                    </div>
+                                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                        {uploadProgress.processed.toLocaleString()} / {uploadProgress.total.toLocaleString()} rows
+                                        ({uploadProgress.percentage}%)
+                                        {uploadProgress.added > 0 && ` • ${uploadProgress.added.toLocaleString()} added`}
+                                        {uploadProgress.errors > 0 && ` • ${uploadProgress.errors} errors`}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <input
@@ -176,12 +207,14 @@ const Upload = () => {
                             type="file"
                             accept=".csv"
                             onChange={handleFileInput}
+                            disabled={uploading}
                             style={{ display: 'none' }}
                         />
 
                         <button
                             onClick={downloadSampleCSV}
                             className="btn btn-outline"
+                            disabled={uploading}
                             style={{ width: '100%', marginBottom: '1rem' }}
                         >
                             📥 Download Sample CSV
@@ -197,7 +230,9 @@ const Upload = () => {
                         }}>
                             <strong style={{ color: 'var(--festive-gold)' }}>CSV Format:</strong><br />
                             <strong>Required columns:</strong> Full Name, Phone, Divisonal Office, Ticket Number<br />
-                            <strong>Optional columns:</strong> Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time
+                            <strong>Optional columns:</strong> Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time<br />
+                            <br />
+                            <strong style={{ color: 'var(--festive-gold)' }}>📍 Note:</strong> Data is stored locally in your browser using IndexedDB
                         </div>
                     </div>
 
@@ -229,6 +264,7 @@ const Upload = () => {
                             <button
                                 onClick={handleClearAll}
                                 className="btn btn-primary"
+                                disabled={uploading}
                                 style={{ width: '100%' }}
                             >
                                 🗑️ Clear All Data

@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+import * as IDB from './idb.js';
 
 /**
  * Parse CSV file and extract participant data
@@ -29,7 +30,6 @@ export const parseCSV = (file) => {
                         }
 
                         return {
-                            id: `${Date.now()}_${index}`,
                             fullName,
                             phone,
                             billReceipt: row['Bill Receipt']?.trim() || '',
@@ -61,6 +61,112 @@ export const parseCSV = (file) => {
             },
             error: (error) => {
                 reject(new Error(`CSV parsing error: ${error.message}`));
+            }
+        });
+    });
+};
+
+/**
+ * Parse CSV file in chunks and save directly to IndexedDB
+ * Optimized for large files (10k+ rows)
+ */
+export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
+    return new Promise((resolve, reject) => {
+        let allParticipants = [];
+        let totalRows = 0;
+        let processedRows = 0;
+        let addedCount = 0;
+        let errorCount = 0;
+        const errors = [];
+
+        // First pass: count total rows
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            preview: 0, // Parse all to count
+            complete: (countResult) => {
+                totalRows = countResult.data.length;
+
+                // Second pass: process in chunks
+                Papa.parse(file, {
+                    header: true,
+                    skipEmptyLines: true,
+                    chunk: async (results, parser) => {
+                        // Pause parsing while we process this chunk
+                        parser.pause();
+
+                        try {
+                            const chunk = results.data.map((row, index) => {
+                                const fullName = row['Full Name']?.trim();
+                                const phone = row['Phone']?.trim();
+                                const divisonalOffice = row['Divisonal Office']?.trim();
+                                const ticketNumber = row['Ticket Number']?.trim();
+
+                                if (!fullName || !phone || !divisonalOffice || !ticketNumber) {
+                                    errors.push(`Row ${processedRows + index + 1}: Missing required fields`);
+                                    return null;
+                                }
+
+                                return {
+                                    fullName,
+                                    phone,
+                                    billReceipt: row['Bill Receipt']?.trim() || '',
+                                    vehicleRegistrationNumber: row['Vehicle Registration Number']?.trim() || '',
+                                    vehicleType: row['Vehicle Type']?.trim() || '',
+                                    sapCode: row['SAP Code']?.trim() || '',
+                                    retailOutletName: row['Retail Outlet Name']?.trim() || '',
+                                    rsa: row['RSA']?.trim() || '',
+                                    divisonalOffice,
+                                    submissionDateTime: row['Submission Date & Time']?.trim() || '',
+                                    ticketNumber,
+                                    uploadedAt: new Date().toISOString()
+                                };
+                            }).filter(p => p !== null);
+
+                            // Save chunk to IndexedDB
+                            if (chunk.length > 0) {
+                                const result = await IDB.batchAddParticipants(chunk);
+                                addedCount += result.addedCount;
+                                errorCount += result.errorCount;
+                                errors.push(...result.errors);
+                            }
+
+                            processedRows += results.data.length;
+
+                            // Report progress
+                            if (onProgress) {
+                                onProgress({
+                                    processed: processedRows,
+                                    total: totalRows,
+                                    added: addedCount,
+                                    errors: errorCount,
+                                    percentage: Math.round((processedRows / totalRows) * 100)
+                                });
+                            }
+
+                            // Resume parsing
+                            parser.resume();
+                        } catch (error) {
+                            parser.abort();
+                            reject(error);
+                        }
+                    },
+                    complete: () => {
+                        resolve({
+                            success: true,
+                            count: addedCount,
+                            total: totalRows,
+                            errors: errors.length > 0 ? errors : undefined
+                        });
+                    },
+                    error: (error) => {
+                        reject(new Error(`CSV parsing error: ${error.message}`));
+                    },
+                    chunkSize: chunkSize * 1024 // Convert to bytes (approximate)
+                });
+            },
+            error: (error) => {
+                reject(new Error(`Failed to count CSV rows: ${error.message}`));
             }
         });
     });

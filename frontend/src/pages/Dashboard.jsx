@@ -47,20 +47,8 @@ const Dashboard = () => {
         }
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/draws/export`);
-            if (!response.ok) {
-                throw new Error('Export failed');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `megadraw_winners_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            const { exportWinnersCSV } = await import('../utils/storage');
+            await exportWinnersCSV();
         } catch (error) {
             console.error('Export error:', error);
             alert('Failed to export winners');

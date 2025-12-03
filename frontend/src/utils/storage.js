@@ -1,38 +1,30 @@
-// API utilities for FillNWin backend integration
+// API utilities for FillNWin - IndexedDB storage with backend auth only
+import * as IDB from './idb.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Participants Management
+// ============================================
+// PARTICIPANTS MANAGEMENT (IndexedDB)
+// ============================================
+
 export const saveParticipants = async (participants) => {
-    // This is handled by the CSV upload endpoint
-    console.warn('saveParticipants is deprecated, use uploadCSV instead');
-    return { success: true };
+    try {
+        const result = await IDB.batchAddParticipants(participants);
+        return {
+            success: true,
+            count: result.addedCount,
+            errors: result.errors
+        };
+    } catch (error) {
+        console.error('Error saving participants:', error);
+        return { success: false, error: error.message };
+    }
 };
 
 export const getParticipants = async () => {
     try {
-        const response = await fetch(`${API_BASE_URL}/participants`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch participants');
-        }
-        const data = await response.json();
-
-        // Transform snake_case to camelCase for frontend compatibility
-        return data.map(p => ({
-            id: p.id,
-            fullName: p.full_name,
-            phone: p.phone,
-            billReceipt: p.bill_receipt,
-            vehicleRegistrationNumber: p.vehicle_registration_number,
-            vehicleType: p.vehicle_type,
-            sapCode: p.sap_code,
-            retailOutletName: p.retail_outlet_name,
-            rsa: p.rsa,
-            divisonalOffice: p.divisonal_office,
-            submissionDateTime: p.submission_date_time,
-            ticketNumber: p.ticket_number,
-            uploadedAt: p.uploaded_at
-        }));
+        const participants = await IDB.getAllParticipants(true); // Only non-drawn
+        return participants;
     } catch (error) {
         console.error('Error retrieving participants:', error);
         return [];
@@ -41,80 +33,18 @@ export const getParticipants = async () => {
 
 export const clearParticipants = async () => {
     try {
-        const response = await fetch(`${API_BASE_URL}/participants`, {
-            method: 'DELETE'
-        });
-        return await response.json();
+        await IDB.clearAllParticipants();
+        return { success: true, message: 'All participants cleared' };
     } catch (error) {
         console.error('Error clearing participants:', error);
         return { success: false, error: error.message };
     }
 };
 
-// Draw History Management
-export const saveDrawHistory = async (history) => {
-    // This is deprecated, use addDrawToHistory instead
-    console.warn('saveDrawHistory is deprecated');
-    return { success: true };
-};
-
-export const getDrawHistory = async () => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/draws`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch draw history');
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Error retrieving draw history:', error);
-        return [];
-    }
-};
-
-export const addDrawToHistory = async (winner) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/draws`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ winner })
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to add winner to history');
-        }
-
-        const data = await response.json();
-        return data.entry;
-    } catch (error) {
-        console.error('Error adding draw to history:', error);
-        throw error;
-    }
-};
-
-export const clearDrawHistory = async () => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/draws`, {
-            method: 'DELETE'
-        });
-        return await response.json();
-    } catch (error) {
-        console.error('Error clearing draw history:', error);
-        return { success: false, error: error.message };
-    }
-};
-
-// Remove participant after they've been selected
 export const removeParticipant = async (participantId) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/participants/${participantId}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to remove participant');
-        }
+        // Mark participant as drawn instead of deleting
+        await IDB.updateParticipant(participantId, { isDrawn: true });
 
         // Return updated list of participants
         return await getParticipants();
@@ -124,14 +54,53 @@ export const removeParticipant = async (participantId) => {
     }
 };
 
-// Get statistics
+// ============================================
+// DRAW HISTORY MANAGEMENT (IndexedDB)
+// ============================================
+
+export const saveDrawHistory = async (history) => {
+    console.warn('saveDrawHistory is deprecated');
+    return { success: true };
+};
+
+export const getDrawHistory = async () => {
+    try {
+        const history = await IDB.getAllDrawHistory();
+        return history;
+    } catch (error) {
+        console.error('Error retrieving draw history:', error);
+        return [];
+    }
+};
+
+export const addDrawToHistory = async (winner) => {
+    try {
+        const entry = await IDB.addToDrawHistory(winner);
+        return entry;
+    } catch (error) {
+        console.error('Error adding draw to history:', error);
+        throw error;
+    }
+};
+
+export const clearDrawHistory = async () => {
+    try {
+        await IDB.clearAllDrawHistory();
+        return { success: true, message: 'All draw history cleared' };
+    } catch (error) {
+        console.error('Error clearing draw history:', error);
+        return { success: false, error: error.message };
+    }
+};
+
+// ============================================
+// STATISTICS (IndexedDB)
+// ============================================
+
 export const getStats = async () => {
     try {
-        const response = await fetch(`${API_BASE_URL}/stats`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch statistics');
-        }
-        return await response.json();
+        const stats = await IDB.getStats();
+        return stats;
     } catch (error) {
         console.error('Error retrieving stats:', error);
         return {
@@ -142,3 +111,63 @@ export const getStats = async () => {
     }
 };
 
+// ============================================
+// CSV EXPORT (Client-side, from IndexedDB)
+// ============================================
+
+export const exportWinnersCSV = async () => {
+    try {
+        const history = await IDB.getAllDrawHistory();
+
+        if (history.length === 0) {
+            throw new Error('No winners to export');
+        }
+
+        // CSV headers
+        const headers = [
+            'Full Name', 'Phone', 'Bill Receipt', 'Vehicle Registration Number',
+            'Vehicle Type', 'SAP Code', 'Retail Outlet Name', 'RSA',
+            'Divisonal Office', 'Submission Date & Time', 'Ticket Number',
+            'Draw Date', 'Draw Time', 'Prize Rank'
+        ];
+
+        // CSV rows
+        const rows = history.map(entry => [
+            entry.winner.fullName,
+            entry.winner.phone,
+            entry.winner.billReceipt || '',
+            entry.winner.vehicleRegistrationNumber || '',
+            entry.winner.vehicleType || '',
+            entry.winner.sapCode || '',
+            entry.winner.retailOutletName || '',
+            entry.winner.rsa || '',
+            entry.winner.divisonalOffice,
+            entry.winner.submissionDateTime || '',
+            entry.winner.ticketNumber,
+            entry.date,
+            entry.time,
+            entry.winner.prizeRank || ''
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        // Create download
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `fillnwin_winners_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        return { success: true };
+    } catch (error) {
+        console.error('Export error:', error);
+        throw error;
+    }
+};

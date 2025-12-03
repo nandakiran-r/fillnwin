@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { getParticipants } from '../utils/storage';
+import * as IDB from '../utils/idb';
 
 const MegaDraw = () => {
     const [participants, setParticipants] = useState([]);
@@ -14,9 +15,8 @@ const MegaDraw = () => {
 
     const loadData = async () => {
         const p = await getParticipants();
-        // Filter out already drawn participants if needed, but the backend handles it.
-        // For UI, we just show total available.
-        setParticipants(p.filter(p => !p.isDrawn));
+        // Get only non-drawn participants
+        setParticipants(p);
     };
 
     const handleMegaDraw = async () => {
@@ -28,16 +28,51 @@ const MegaDraw = () => {
         setError(null);
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/draws/mega`, {
-                method: 'POST',
-            });
-            const data = await response.json();
+            // Get all eligible participants from IndexedDB
+            let eligibleParticipants = await IDB.getAllParticipants(true);
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to conduct mega draw');
+            // Check if we have enough participants
+            const requiredParticipants = 1 + 3 + 25;
+            if (eligibleParticipants.length < requiredParticipants) {
+                throw new Error(`Not enough participants. Required: ${requiredParticipants}, Available: ${eligibleParticipants.length}`);
             }
 
-            setWinners(data.winners);
+            // Shuffle participants (Fisher-Yates shuffle)
+            for (let i = eligibleParticipants.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [eligibleParticipants[i], eligibleParticipants[j]] = [eligibleParticipants[j], eligibleParticipants[i]];
+            }
+
+            // Select winners
+            const firstPrizeWinners = eligibleParticipants.slice(0, 1);
+            const secondPrizeWinners = eligibleParticipants.slice(1, 4);
+            const thirdPrizeWinners = eligibleParticipants.slice(4, 29);
+
+            const allWinners = [
+                ...firstPrizeWinners.map(w => ({ ...w, prizeRank: '1st Prize' })),
+                ...secondPrizeWinners.map(w => ({ ...w, prizeRank: '2nd Prize' })),
+                ...thirdPrizeWinners.map(w => ({ ...w, prizeRank: '3rd Prize' }))
+            ];
+
+            // Save winners to draw history and mark as drawn
+            const now = new Date();
+            const drawDate = now.toLocaleDateString();
+            const drawTime = now.toLocaleTimeString();
+
+            for (const winner of allWinners) {
+                // Mark as drawn
+                await IDB.updateParticipant(winner.id, { isDrawn: true });
+
+                // Add to history
+                await IDB.addToDrawHistory(winner);
+            }
+
+            setWinners({
+                first: firstPrizeWinners,
+                second: secondPrizeWinners,
+                third: thirdPrizeWinners
+            });
+
             await loadData(); // Refresh participants list
         } catch (err) {
             setError(err.message);
@@ -55,17 +90,17 @@ const MegaDraw = () => {
             }}>
                 <div>
                     <h4 style={{ fontSize: '1.1rem', color: 'var(--festive-gold)', marginBottom: '0.25rem' }}>
-                        {rank} 🏆 {winner.full_name || winner.fullName}
+                        {rank} 🏆 {winner.fullName}
                     </h4>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.25rem 0' }}>
                         📞 {winner.phone}
                     </p>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0.25rem 0' }}>
-                        🏢 {winner.divisonal_office || winner.divisonalOffice}
+                        🏢 {winner.divisonalOffice}
                     </p>
                 </div>
                 <div className="badge badge-gold">
-                    {winner.ticket_number || winner.ticketNumber}
+                    {winner.ticketNumber}
                 </div>
             </div>
         </div>
