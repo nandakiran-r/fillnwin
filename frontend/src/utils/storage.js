@@ -23,7 +23,7 @@ export const saveParticipants = async (participants) => {
 
 export const getParticipants = async () => {
     try {
-        const participants = await IDB.getAllParticipants(true); // Only non-drawn
+        const participants = await IDB.getAllParticipants();
         return participants;
     } catch (error) {
         console.error('Error retrieving participants:', error);
@@ -43,8 +43,8 @@ export const clearParticipants = async () => {
 
 export const removeParticipant = async (participantId) => {
     try {
-        // Mark participant as drawn instead of deleting
-        await IDB.updateParticipant(participantId, { isDrawn: true });
+        // Delete participant from database
+        await IDB.deleteParticipant(participantId);
 
         // Return updated list of participants
         return await getParticipants();

@@ -37,7 +37,6 @@ const initDB = () => {
                     autoIncrement: true
                 });
                 participantStore.createIndex('ticketNumber', 'ticketNumber', { unique: true });
-                participantStore.createIndex('isDrawn', 'isDrawn', { unique: false });
                 participantStore.createIndex('uploadedAt', 'uploadedAt', { unique: false });
             }
 
@@ -63,9 +62,9 @@ const getTransaction = async (storeName, mode = 'readonly') => {
 };
 
 /**
- * Get all participants (optionally filter by isDrawn status)
+ * Get all participants
  */
-export const getAllParticipants = async (filterDrawn = true) => {
+export const getAllParticipants = async () => {
     const db = await initDB();
     const transaction = db.transaction(STORES.PARTICIPANTS, 'readonly');
     const store = transaction.objectStore(STORES.PARTICIPANTS);
@@ -74,14 +73,7 @@ export const getAllParticipants = async (filterDrawn = true) => {
         const request = store.getAll();
 
         request.onsuccess = () => {
-            let participants = request.result;
-
-            // Filter out already drawn participants if requested
-            if (filterDrawn) {
-                participants = participants.filter(p => !p.isDrawn);
-            }
-
-            resolve(participants);
+            resolve(request.result);
         };
 
         request.onerror = () => {
@@ -98,10 +90,8 @@ export const addParticipant = async (participant) => {
     const transaction = db.transaction(STORES.PARTICIPANTS, 'readwrite');
     const store = transaction.objectStore(STORES.PARTICIPANTS);
 
-    // Ensure isDrawn is set
     const participantData = {
         ...participant,
-        isDrawn: false,
         uploadedAt: participant.uploadedAt || new Date().toISOString()
     };
 
@@ -145,7 +135,6 @@ export const batchAddParticipants = async (participants, onProgress = null) => {
 
             const participant = {
                 ...participants[index],
-                isDrawn: false,
                 uploadedAt: participants[index].uploadedAt || new Date().toISOString()
             };
 
@@ -219,6 +208,27 @@ export const updateParticipant = async (id, updates) => {
 
         getRequest.onerror = () => {
             reject(new Error('Failed to get participant'));
+        };
+    });
+};
+
+/**
+ * Delete a participant by ID
+ */
+export const deleteParticipant = async (id) => {
+    const db = await initDB();
+    const transaction = db.transaction(STORES.PARTICIPANTS, 'readwrite');
+    const store = transaction.objectStore(STORES.PARTICIPANTS);
+
+    return new Promise((resolve, reject) => {
+        const request = store.delete(id);
+
+        request.onsuccess = () => {
+            resolve({ success: true });
+        };
+
+        request.onerror = () => {
+            reject(new Error('Failed to delete participant'));
         };
     });
 };
@@ -353,8 +363,8 @@ export const getStats = async () => {
 
         const checkComplete = () => {
             if (participants.length !== undefined && history.length !== undefined) {
-                const totalParticipants = participants.length;
-                const remainingParticipants = participants.filter(p => !p.isDrawn).length;
+                const totalParticipants = participants.length + history.length; // Total ever uploaded
+                const remainingParticipants = participants.length; // Current participants pool
                 const totalDraws = history.length;
 
                 resolve({
@@ -372,6 +382,7 @@ export default {
     addParticipant,
     batchAddParticipants,
     updateParticipant,
+    deleteParticipant,
     clearAllParticipants,
     getAllDrawHistory,
     addToDrawHistory,
