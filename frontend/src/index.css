@@ -1,24 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;900&display=swap');
 
 :root {
-  /* Christmas Color Palette */
-  --crimson-red: #DC143C;
-  --deep-red: #8B0000;
-  --festive-gold: #FFD700;
-  --golden-yellow: #FFA500;
-  --pine-green: #2D5016;
-  --forest-green: #0B6623;
+  /* Dark Blue Theme */
+  --primary-blue: #5b7cff;
+  --secondary-blue: #6b8dff;
+  --light-blue: #8ba8ff;
+  --accent-blue: #7a9aff;
+  --slate-dark: #2a2556;
+  --slate-light: #3d3571;
   --snow-white: #FFFAFA;
-  --cream: #FFF8DC;
+  --cream: #F3F4F6;
 
   /* UI Colors */
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --glass-bg: rgba(220, 20, 60, 0.1);
-  --glass-border: rgba(255, 215, 0, 0.2);
+  --bg-primary: #1e187a;
+  --bg-secondary: #2a2460;
+  --glass-bg: rgba(107, 141, 255, 0.1);
+  --glass-border: rgba(107, 141, 255, 0.3);
   --text-primary: #ffffff;
-  --text-secondary: #e0e0e0;
-  --text-muted: #a0a0a0;
+  --text-secondary: #e0e7ff;
+  --text-muted: #b4b8e0;
 
   /* Shadows & Effects */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -53,15 +53,17 @@
 }
 
 body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg-primary);
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #1e187a;
+  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
   min-height: 100vh;
+  position: relative;
 }
 
-/* Festive Background */
+/* Subtle blue overlay */
 body::before {
   content: '';
   position: fixed;
@@ -69,9 +71,9 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--deep-red) 0%, var(--bg-primary) 50%, var(--pine-green) 100%);
-  opacity: 0.3;
+  background: transparent;
   z-index: -2;
+  pointer-events: none;
 }
 
 body::after {
@@ -81,32 +83,9 @@ body::after {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image:
-    radial-gradient(2px 2px at 20% 30%, white, transparent),
-    radial-gradient(2px 2px at 60% 70%, white, transparent),
-    radial-gradient(1px 1px at 50% 50%, white, transparent),
-    radial-gradient(1px 1px at 80% 10%, white, transparent),
-    radial-gradient(2px 2px at 90% 60%, white, transparent),
-    radial-gradient(1px 1px at 33% 80%, white, transparent),
-    radial-gradient(1px 1px at 66% 33%, white, transparent);
-  background-size: 200% 200%;
-  background-position: 0% 0%;
-  animation: snowfall 20s ease-in-out infinite;
-  opacity: 0.4;
+  background: transparent;
   z-index: -1;
   pointer-events: none;
-}
-
-@keyframes snowfall {
-
-  0%,
-  100% {
-    background-position: 0% 0%;
-  }
-
-  50% {
-    background-position: 100% 100%;
-  }
 }
 
 h1,
@@ -122,10 +101,7 @@ h6 {
 
 h1 {
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--festive-gold), var(--crimson-red));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #333;
 }
 
 h2 {
@@ -157,8 +133,6 @@ h3 {
 .festive-card {
   background: linear-gradient(135deg, rgba(220, 20, 60, 0.1), rgba(45, 80, 22, 0.1));
   backdrop-filter: blur(20px);
-  border: 2px solid;
-  border-image: linear-gradient(135deg, var(--festive-gold), var(--crimson-red)) 1;
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-lg);
@@ -166,69 +140,49 @@ h3 {
   overflow: hidden;
 }
 
-.festive-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg,
-      transparent 30%,
-      rgba(255, 215, 0, 0.1) 50%,
-      transparent 70%);
-  animation: shimmer 3s linear infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-  }
-
-  100% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
-  }
-}
-
 /* Buttons */
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: var(--radius-md);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-base);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   text-decoration: none;
   position: relative;
   overflow: hidden;
+  letter-spacing: 0.5px;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--crimson-red), var(--deep-red));
+  background: var(--secondary-blue);
   color: var(--snow-white);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 8px rgba(107, 141, 255, 0.4);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), var(--glow-red);
+  box-shadow: 0 4px 16px rgba(107, 141, 255, 0.5);
+  background: var(--light-blue);
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--festive-gold), var(--golden-yellow));
-  color: var(--deep-red);
-  box-shadow: var(--shadow-md);
-  font-weight: 700;
+  background: var(--secondary-blue);
+  color: var(--snow-white);
+  box-shadow: 0 2px 8px rgba(107, 141, 255, 0.4);
+  font-weight: 600;
 }
 
 .btn-gold:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: var(--shadow-lg), var(--glow-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(107, 141, 255, 0.5);
+  background: var(--light-blue);
 }
 
 .btn-outline {
@@ -273,7 +227,7 @@ textarea {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1rem;
   transition: all var(--transition-base);
 }
@@ -474,13 +428,15 @@ input::placeholder {
 }
 
 .badge-gold {
-  background: linear-gradient(135deg, var(--festive-gold), var(--golden-yellow));
-  color: var(--deep-red);
+  background: rgba(107, 141, 255, 0.3);
+  color: #a5baff;
+  border: 1px solid rgba(107, 141, 255, 0.5);
 }
 
 .badge-red {
-  background: var(--crimson-red);
-  color: white;
+  background: rgba(107, 141, 255, 0.2);
+  color: #b4c4ff;
+  border: 1px solid rgba(107, 141, 255, 0.4);
 }
 
 /* Modal Overlay */

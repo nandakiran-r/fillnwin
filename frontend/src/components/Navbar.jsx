@@ -8,90 +8,145 @@ const Navbar = () => {
     const handleLogout = () => {
         const result = logout();
         if (result.success) {
-            // Use replace to avoid navigation stack issues
             navigate('/', { replace: true });
         }
     };
 
+    const isActive = (path) => location.pathname === path;
+
     return (
         <nav style={{
-            background: 'rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(20px)',
-            borderBottom: '1px solid rgba(255, 215, 0, 0.2)',
+            background: 'rgba(42, 36, 96, 0.8)',
+            borderBottom: '1px solid rgba(107, 141, 255, 0.25)',
             padding: '1rem 0',
             position: 'sticky',
             top: 0,
-            zIndex: 100
+            zIndex: 100,
+            fontFamily: "'Roboto', sans-serif"
         }}>
             <div className="container flex-between">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <h2 style={{
-                        fontSize: '1.5rem',
-                        background: 'linear-gradient(135deg, var(--festive-gold), var(--crimson-red))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                        margin: 0
+                        fontSize: '1.4rem',
+                        color: '#e0e7ff',
+                        margin: 0,
+                        fontFamily: "'Roboto', sans-serif",
+                        fontWeight: '700',
+                        letterSpacing: '0.5px'
                     }}>
-                        🎄 FillNWin Admin
+                        Mega Draw Admin
                     </h2>
                 </div>
 
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                     <Link
                         to="/dashboard"
-                        className={`btn btn-outline ${location.pathname === '/dashboard' ? 'active' : ''}`}
                         style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.9rem',
-                            ...(location.pathname === '/dashboard' && {
-                                background: 'var(--festive-gold)',
-                                color: 'var(--deep-red)'
-                            })
+                            padding: '0.65rem 1.25rem',
+                            fontSize: '0.95rem',
+                            fontFamily: "'Roboto', sans-serif",
+                            fontWeight: '500',
+                            color: isActive('/dashboard') ? '#ffffff' : '#b4b8e0',
+                            background: isActive('/dashboard') ? 'rgba(107, 141, 255, 0.3)' : 'transparent',
+                            border: isActive('/dashboard') ? '1px solid rgba(107, 141, 255, 0.5)' : '1px solid rgba(107, 141, 255, 0.2)',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'inline-block'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.25)';
+                            e.currentTarget.style.color = '#e0e7ff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = isActive('/dashboard') ? 'rgba(107, 141, 255, 0.3)' : 'transparent';
+                            e.currentTarget.style.color = isActive('/dashboard') ? '#ffffff' : '#b4b8e0';
                         }}
                     >
-                        📊 Dashboard
+                        Dashboard
                     </Link>
 
                     <Link
                         to="/upload"
-                        className={`btn btn-outline ${location.pathname === '/upload' ? 'active' : ''}`}
                         style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.9rem',
-                            ...(location.pathname === '/upload' && {
-                                background: 'var(--festive-gold)',
-                                color: 'var(--deep-red)'
-                            })
+                            padding: '0.65rem 1.25rem',
+                            fontSize: '0.95rem',
+                            fontFamily: "'Roboto', sans-serif",
+                            fontWeight: '500',
+                            color: isActive('/upload') ? '#ffffff' : '#b4b8e0',
+                            background: isActive('/upload') ? 'rgba(107, 141, 255, 0.3)' : 'transparent',
+                            border: isActive('/upload') ? '1px solid rgba(107, 141, 255, 0.5)' : '1px solid rgba(107, 141, 255, 0.2)',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'inline-block'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.25)';
+                            e.currentTarget.style.color = '#e0e7ff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = isActive('/upload') ? 'rgba(107, 141, 255, 0.3)' : 'transparent';
+                            e.currentTarget.style.color = isActive('/upload') ? '#ffffff' : '#b4b8e0';
                         }}
                     >
-                        📤 Upload
+                        Upload
                     </Link>
 
                     <Link
                         to="/mega-draw"
-                        className={`btn btn-outline ${location.pathname === '/mega-draw' ? 'active' : ''}`}
                         style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.9rem',
-                            ...(location.pathname === '/mega-draw' && {
-                                background: 'var(--festive-gold)',
-                                color: 'var(--deep-red)'
-                            })
+                            padding: '0.65rem 1.25rem',
+                            fontSize: '0.95rem',
+                            fontFamily: "'Roboto', sans-serif",
+                            fontWeight: '500',
+                            color: isActive('/mega-draw') ? '#ffffff' : '#b4b8e0',
+                            background: isActive('/mega-draw') ? 'rgba(107, 141, 255, 0.3)' : 'transparent',
+                            border: isActive('/mega-draw') ? '1px solid rgba(107, 141, 255, 0.5)' : '1px solid rgba(107, 141, 255, 0.2)',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'inline-block'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.25)';
+                            e.currentTarget.style.color = '#e0e7ff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = isActive('/mega-draw') ? 'rgba(107, 141, 255, 0.3)' : 'transparent';
+                            e.currentTarget.style.color = isActive('/mega-draw') ? '#ffffff' : '#b4b8e0';
                         }}
                     >
-                        🌟 Mega Draw
+                        Mega Draw
                     </Link>
 
                     <button
                         onClick={handleLogout}
-                        className="btn btn-primary"
                         style={{
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.9rem'
+                            padding: '0.65rem 1.25rem',
+                            fontSize: '0.95rem',
+                            fontFamily: "'Roboto', sans-serif",
+                            fontWeight: '600',
+                            color: '#ffffff',
+                            background: 'rgba(107, 141, 255, 0.35)',
+                            border: '1px solid rgba(107, 141, 255, 0.4)',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.5)';
+                            e.currentTarget.style.borderColor = 'rgba(107, 141, 255, 0.6)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.35)';
+                            e.currentTarget.style.borderColor = 'rgba(107, 141, 255, 0.4)';
                         }}
                     >
-                        🚪 Logout
+                        Logout
                     </button>
                 </div>
             </div>
