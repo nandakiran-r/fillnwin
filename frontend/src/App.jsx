@@ -3,6 +3,7 @@ import { isAuthenticated } from './utils/auth';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
+import CouponDraw from './pages/CouponDraw';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -31,6 +32,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Upload />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/coupon-draw"
+          element={
+            <ProtectedRoute>
+              <CouponDraw />
             </ProtectedRoute>
           }
         />

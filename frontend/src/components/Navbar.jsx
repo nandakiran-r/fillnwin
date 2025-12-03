@@ -95,6 +95,34 @@ const Navbar = () => {
                         Upload
                     </Link>
 
+                    <Link
+                        to="/coupon-draw"
+                        style={{
+                            padding: '0.65rem 1.25rem',
+                            fontSize: '0.95rem',
+                            fontFamily: "'Roboto', sans-serif",
+                            fontWeight: '500',
+                            color: isActive('/coupon-draw') ? '#ffffff' : '#b4b8e0',
+                            background: isActive('/coupon-draw') ? 'rgba(107, 141, 255, 0.3)' : 'transparent',
+                            border: isActive('/coupon-draw') ? '1px solid rgba(107, 141, 255, 0.5)' : '1px solid rgba(107, 141, 255, 0.2)',
+                            borderRadius: '6px',
+                            textDecoration: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            display: 'inline-block'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.25)';
+                            e.currentTarget.style.color = '#e0e7ff';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = isActive('/coupon-draw') ? 'rgba(107, 141, 255, 0.3)' : 'transparent';
+                            e.currentTarget.style.color = isActive('/coupon-draw') ? '#ffffff' : '#b4b8e0';
+                        }}
+                    >
+                        Coupon Draw
+                    </Link>
+
                     <button
                         onClick={handleLogout}
                         style={{
