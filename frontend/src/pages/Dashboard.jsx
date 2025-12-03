@@ -19,8 +19,8 @@ const Dashboard = () => {
     // Prize configurations
     const prizes = {
         first: { name: '1st Prize', title: 'MARUTI SUZUKI SWIFT', subtitle: 'LXI 1.2L (SS SMT)', image: '/swift-car.png' },
-        second: { name: '2nd Prize', title: 'SCOOTER', subtitle: 'Two Wheeler', image: '/scooter-image.png' },
-        third: { name: '3rd Prize', title: 'SMARTPHONE', subtitle: 'Latest Model', image: '/phone-image.png' }
+        second: { name: '2nd Prize', title: 'HONDA ACTIVA 125', subtitle: 'Two Wheeler', image: '/scooter-image.png' },
+        third: { name: '3rd Prize', title: 'VIVO Y19 5G', subtitle: 'Latest Model', image: '/phone-image.png' }
     };
 
     useEffect(() => {
@@ -437,7 +437,7 @@ const Dashboard = () => {
 
                 {/* Prize Draw Cards */}
                 {participants.length > 0 && (
-                    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                    <div style={{ maxWidth: '1500px', margin: '0 auto' }}>
                         {renderPrizeCard('first')}
                         {renderPrizeCard('second')}
                         {renderPrizeCard('third')}

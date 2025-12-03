@@ -130,7 +130,7 @@ const Upload = () => {
 
             <div className="container" style={{ marginTop: '2rem' }}>
                 <div className="text-center" style={{ marginBottom: '2rem' }}>
-                    <h1>📤 Upload Participants</h1>
+                    <h1 style={{ color: 'var(--text-primary)' }}>📤 Upload Participants</h1>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', marginTop: '0.5rem' }}>
                         Upload CSV file with participant data (stored locally in browser)
                     </p>
