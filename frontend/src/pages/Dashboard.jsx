@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { getParticipants, removeParticipant, getDrawHistory, addDrawToHistory, getStats } from '../utils/storage';
+import { getParticipants, removeParticipant, getDrawHistory, addDrawToHistory, getStats, exportWinnersByPrize } from '../utils/storage';
 
 const Dashboard = () => {
     const [participants, setParticipants] = useState([]);
@@ -35,6 +35,15 @@ const Dashboard = () => {
         setParticipants(p);
         setDrawHistory(h);
         setStats(s);
+    };
+
+    const handleExportPrize = async (prizeRank) => {
+        try {
+            await exportWinnersByPrize(prizeRank);
+        } catch (error) {
+            console.error('Export error:', error);
+            alert(error.message || 'Failed to export winners');
+        }
     };
 
 
@@ -259,19 +268,55 @@ const Dashboard = () => {
                         padding: '1.5rem',
                         background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(59, 89, 152, 0.95) 100%)',
                         overflowY: 'auto',
-                        maxHeight: '350px'
+                        maxHeight: '400px'
                     }}>
-                        <h4 style={{
-                            color: prizeColor,
-                            fontSize: '1rem',
-                            marginTop: 0,
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
                             marginBottom: '1rem',
-                            fontWeight: '700',
                             borderBottom: `2px solid ${prizeColor}`,
                             paddingBottom: '0.5rem'
                         }}>
-                            {prizeType === 'first' ? '🥇' : prizeType === 'second' ? '🥈' : '🥉'} Winners ({prizeWinners.length})
-                        </h4>
+                            <h4 style={{
+                                color: prizeColor,
+                                fontSize: '1rem',
+                                marginTop: 0,
+                                marginBottom: 0,
+                                fontWeight: '700'
+                            }}>
+                                {prizeType === 'first' ? '🥇' : prizeType === 'second' ? '🥈' : '🥉'} Winners ({prizeWinners.length})
+                            </h4>
+                            {prizeWinners.length > 0 && (
+                                <button
+                                    onClick={() => handleExportPrize(prize.name)}
+                                    style={{
+                                        background: 'rgba(255, 215, 0, 0.2)',
+                                        border: `1px solid ${prizeColor}`,
+                                        color: prizeColor,
+                                        padding: '0.4rem 0.8rem',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '600',
+                                        transition: 'all 0.3s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.3rem'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.background = prizeColor;
+                                        e.target.style.color = prizeType === 'third' ? '#fff' : '#000';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.background = 'rgba(255, 215, 0, 0.2)';
+                                        e.target.style.color = prizeColor;
+                                    }}
+                                >
+                                    📥 Export CSV
+                                </button>
+                            )}
+                        </div>
 
                         {prizeWinners.length === 0 ? (
                             <p style={{

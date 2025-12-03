@@ -171,3 +171,67 @@ export const exportWinnersCSV = async () => {
         throw error;
     }
 };
+
+// Export winners filtered by prize rank
+export const exportWinnersByPrize = async (prizeRank) => {
+    try {
+        const history = await IDB.getAllDrawHistory();
+
+        // Filter by prize rank if provided
+        const filteredHistory = prizeRank
+            ? history.filter(entry => entry.winner.prizeRank === prizeRank)
+            : history;
+
+        if (filteredHistory.length === 0) {
+            throw new Error(`No winners to export${prizeRank ? ` for ${prizeRank}` : ''}`);
+        }
+
+        // CSV headers
+        const headers = [
+            'Full Name', 'Phone', 'Bill Receipt', 'Vehicle Registration Number',
+            'Vehicle Type', 'SAP Code', 'Retail Outlet Name', 'RSA',
+            'Divisonal Office', 'Submission Date & Time', 'Ticket Number',
+            'Draw Date', 'Draw Time', 'Prize Rank'
+        ];
+
+        // CSV rows
+        const rows = filteredHistory.map(entry => [
+            entry.winner.fullName,
+            entry.winner.phone,
+            entry.winner.billReceipt || '',
+            entry.winner.vehicleRegistrationNumber || '',
+            entry.winner.vehicleType || '',
+            entry.winner.sapCode || '',
+            entry.winner.retailOutletName || '',
+            entry.winner.rsa || '',
+            entry.winner.divisonalOffice,
+            entry.winner.submissionDateTime || '',
+            entry.winner.ticketNumber,
+            entry.date,
+            entry.time,
+            entry.winner.prizeRank || ''
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+
+        // Create download with prize-specific filename
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const prizeLabel = prizeRank ? `_${prizeRank.replace(/\s+/g, '_').toLowerCase()}` : '';
+        link.download = `fillnwin_winners${prizeLabel}_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        return { success: true };
+    } catch (error) {
+        console.error('Export error:', error);
+        throw error;
+    }
+};
