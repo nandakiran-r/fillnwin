@@ -95,34 +95,6 @@ const Navbar = () => {
                         Upload
                     </Link>
 
-                    <Link
-                        to="/mega-draw"
-                        style={{
-                            padding: '0.65rem 1.25rem',
-                            fontSize: '0.95rem',
-                            fontFamily: "'Roboto', sans-serif",
-                            fontWeight: '500',
-                            color: isActive('/mega-draw') ? '#ffffff' : '#b4b8e0',
-                            background: isActive('/mega-draw') ? 'rgba(107, 141, 255, 0.3)' : 'transparent',
-                            border: isActive('/mega-draw') ? '1px solid rgba(107, 141, 255, 0.5)' : '1px solid rgba(107, 141, 255, 0.2)',
-                            borderRadius: '6px',
-                            textDecoration: 'none',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            display: 'inline-block'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'rgba(107, 141, 255, 0.25)';
-                            e.currentTarget.style.color = '#e0e7ff';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = isActive('/mega-draw') ? 'rgba(107, 141, 255, 0.3)' : 'transparent';
-                            e.currentTarget.style.color = isActive('/mega-draw') ? '#ffffff' : '#b4b8e0';
-                        }}
-                    >
-                        Mega Draw
-                    </Link>
-
                     <button
                         onClick={handleLogout}
                         style={{

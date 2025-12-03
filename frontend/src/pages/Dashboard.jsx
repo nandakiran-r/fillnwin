@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import LuckyDrawWheel from '../components/LuckyDrawWheel';
 import { getParticipants, removeParticipant, getDrawHistory, addDrawToHistory, getStats } from '../utils/storage';
 
 const Dashboard = () => {
@@ -9,6 +8,8 @@ const Dashboard = () => {
     const [stats, setStats] = useState({ totalParticipants: 0, totalDraws: 0, remainingParticipants: 0 });
     const [showWinnerModal, setShowWinnerModal] = useState(false);
     const [currentWinner, setCurrentWinner] = useState(null);
+    const [isDrawing, setIsDrawing] = useState(false);
+    const [lastDrawnTicket, setLastDrawnTicket] = useState('XXX-XXX');
 
     useEffect(() => {
         loadData();
@@ -24,15 +25,32 @@ const Dashboard = () => {
         setStats(s);
     };
 
-    const handleWinnerSelected = async (winner) => {
-        await addDrawToHistory(winner);
-        await removeParticipant(winner.id);
-        setCurrentWinner(winner);
-        setShowWinnerModal(true);
+    const handleDrawFirstPrize = async () => {
+        if (participants.length === 0) {
+            alert('No participants available for draw');
+            return;
+        }
 
+        setIsDrawing(true);
+
+        // Simulate drawing animation (random selection)
         setTimeout(async () => {
-            await loadData();
-        }, 500);
+            const randomIndex = Math.floor(Math.random() * participants.length);
+            const winner = participants[randomIndex];
+
+            // Save the winner's ticket for display
+            setLastDrawnTicket(winner.ticketNumber);
+
+            await addDrawToHistory(winner);
+            await removeParticipant(winner.id);
+            setCurrentWinner(winner);
+            setShowWinnerModal(true);
+            setIsDrawing(false);
+
+            setTimeout(async () => {
+                await loadData();
+            }, 500);
+        }, 2000);
     };
 
     const closeModal = () => {
@@ -71,60 +89,265 @@ const Dashboard = () => {
                         style={{
                             height: '70px',
                             marginBottom: '1rem',
-                            filter: 'drop-shadow(0 2px 8px rgba(59, 130, 246, 0.2))'
+                            filter: 'drop-shadow(0 2px 8px rgba(255, 215, 0, 0.3))'
                         }}
                     />
                     <h1 style={{
-                        fontSize: '2.2rem',
-                        color: '#fff',
-                        margin: '0.5rem 0'
+                        fontSize: '2.5rem',
+                        color: '#FFD700',
+                        margin: '0.5rem 0',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
                     }}>
-                        Mega Draw Dashboard
+                        Lucky Draw Dashboard
                     </h1>
                 </div>
 
                 {/* Statistics Cards */}
-                <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ marginBottom: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                     <div style={{
-                        background: 'rgba(107, 141, 255, 0.12)',
-                        border: '1px solid rgba(107, 141, 255, 0.35)',
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        border: '2px solid #FFD700',
                         borderRadius: '12px',
-                        padding: '2rem',
+                        padding: '1.5rem',
                         textAlign: 'center',
-                        maxWidth: '300px',
-                        margin: '0 auto'
+                        minWidth: '200px'
                     }}>
-                        <div style={{ fontSize: '2.5rem', color: '#a5baff', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '2.5rem', color: '#8B0000', fontWeight: 'bold', marginBottom: '0.5rem' }}>
                             {stats.totalParticipants}
                         </div>
-                        <div style={{ color: '#e0e7ff', fontSize: '1rem', fontWeight: '500' }}>
-                            Ready to Draw
+                        <div style={{ color: '#333', fontSize: '1rem', fontWeight: '600' }}>
+                            Total Participants
+                        </div>
+                    </div>
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        border: '2px solid #FFD700',
+                        borderRadius: '12px',
+                        padding: '1.5rem',
+                        textAlign: 'center',
+                        minWidth: '200px'
+                    }}>
+                        <div style={{ fontSize: '2.5rem', color: '#8B0000', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                            {stats.remainingParticipants}
+                        </div>
+                        <div style={{ color: '#333', fontSize: '1rem', fontWeight: '600' }}>
+                            Remaining
                         </div>
                     </div>
                 </div>
 
-                {/* Lucky Draw Section */}
-                {participants.length > 0 ? (
-                    <div style={{ marginBottom: '2.5rem' }}>
-                        <LuckyDrawWheel
-                            participants={participants}
-                            onWinnerSelected={handleWinnerSelected}
-                        />
-                    </div>
-                ) : (
+                {/* First Prize Draw Card */}
+                {participants.length > 0 && (
                     <div style={{
-                        background: 'rgba(107, 141, 255, 0.1)',
-                        border: '2px dashed rgba(107, 141, 255, 0.4)',
+                        background: '#fff',
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                        marginBottom: '2.5rem',
+                        maxWidth: '1000px',
+                        margin: '0 auto 2.5rem'
+                    }}>
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            {/* Left Side - Prize & Car */}
+                            <div style={{
+                                flex: '0 0 45%',
+                                backgroundImage: 'url(swift-car.png)',
+                                padding: '3rem 2rem',
+                                position: 'relative',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundRepeat: 'no-repeat'
+                            }}>
+                                {/* Snowflake decorations */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '10%',
+                                    left: '10%',
+                                    fontSize: '1.5rem',
+                                    color: 'rgba(255, 255, 255, 0.3)'
+                                }}>❄</div>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '20%',
+                                    right: '15%',
+                                    fontSize: '1rem',
+                                    color: 'rgba(255, 255, 255, 0.2)'
+                                }}>❄</div>
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '15%',
+                                    left: '20%',
+                                    fontSize: '1.2rem',
+                                    color: 'rgba(255, 255, 255, 0.25)'
+                                }}>❄</div>
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '25%',
+                                    right: '10%',
+                                    fontSize: '1.3rem',
+                                    color: 'rgba(255, 255, 255, 0.2)'
+                                }}>❄</div>
+                            </div>
+
+                            {/* Right Side - Ticket & Draw Button */}
+                            <div style={{
+                                flex: '0 0 55%',
+                                padding: '3rem 2rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: '#f8f8f8'
+                            }}>
+                                {/* Ticket Number Display */}
+                                <div style={{
+                                    marginBottom: '2rem',
+                                    textAlign: 'center'
+                                }}>
+                                    <p style={{
+                                        color: '#666',
+                                        fontSize: '0.9rem',
+                                        marginBottom: '1rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '1px',
+                                        fontWeight: '600'
+                                    }}>
+                                        Next Lucky Ticket
+                                    </p>
+                                    <div style={{
+                                        background: '#fff',
+                                        border: '4px solid #FFD700',
+                                        borderRadius: '12px',
+                                        padding: '1.5rem 3rem',
+                                        boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3), inset 0 2px 4px rgba(255,215,0,0.1)',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                    }}>
+                                        {/* Decorative corner elements */}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 5,
+                                            left: 5,
+                                            width: '20px',
+                                            height: '20px',
+                                            border: '2px solid #FFD700',
+                                            borderRight: 'none',
+                                            borderBottom: 'none'
+                                        }}></div>
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 5,
+                                            right: 5,
+                                            width: '20px',
+                                            height: '20px',
+                                            border: '2px solid #FFD700',
+                                            borderLeft: 'none',
+                                            borderBottom: 'none'
+                                        }}></div>
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 5,
+                                            left: 5,
+                                            width: '20px',
+                                            height: '20px',
+                                            border: '2px solid #FFD700',
+                                            borderRight: 'none',
+                                            borderTop: 'none'
+                                        }}></div>
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 5,
+                                            right: 5,
+                                            width: '20px',
+                                            height: '20px',
+                                            border: '2px solid #FFD700',
+                                            borderLeft: 'none',
+                                            borderTop: 'none'
+                                        }}></div>
+
+                                        <h3 style={{
+                                            fontSize: '2.5rem',
+                                            fontWeight: 'bold',
+                                            color: '#333',
+                                            margin: 0,
+                                            fontFamily: 'monospace',
+                                            letterSpacing: '2px'
+                                        }}>
+                                            {isDrawing ? '━━━━━━' : lastDrawnTicket}
+                                        </h3>
+                                    </div>
+                                </div>
+
+                                {/* Draw Button */}
+                                <button
+                                    onClick={handleDrawFirstPrize}
+                                    disabled={isDrawing}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                        color: '#000',
+                                        fontSize: '1.5rem',
+                                        fontWeight: 'bold',
+                                        padding: '1.25rem 4rem',
+                                        border: 'none',
+                                        borderRadius: '50px',
+                                        cursor: isDrawing ? 'not-allowed' : 'pointer',
+                                        boxShadow: '0 6px 20px rgba(255, 215, 0, 0.5)',
+                                        transition: 'all 0.3s ease',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '2px',
+                                        opacity: isDrawing ? 0.6 : 1,
+                                        transform: isDrawing ? 'scale(0.95)' : 'scale(1)',
+                                        position: 'relative',
+                                        overflow: 'hidden'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!isDrawing) {
+                                            e.target.style.transform = 'scale(1.05)';
+                                            e.target.style.boxShadow = '0 8px 25px rgba(255, 215, 0, 0.7)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!isDrawing) {
+                                            e.target.style.transform = 'scale(1)';
+                                            e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.5)';
+                                        }
+                                    }}
+                                >
+                                    {isDrawing ? '🎰 DRAWING...' : '🎲 DRAW'}
+                                </button>
+
+                                <p style={{
+                                    marginTop: '1.5rem',
+                                    color: '#999',
+                                    fontSize: '0.85rem',
+                                    textAlign: 'center'
+                                }}>
+                                    {participants.length} participants remaining
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* No Participants Message */}
+                {participants.length === 0 && (
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        border: '2px dashed #FFD700',
                         borderRadius: '12px',
                         padding: '3rem 2rem',
                         textAlign: 'center',
                         marginBottom: '2.5rem'
                     }}>
-                        <h2 style={{ color: '#e0e7ff', marginBottom: '1rem', fontSize: '1.5rem' }}>
+                        <h2 style={{ color: '#333', marginBottom: '1rem', fontSize: '1.5rem' }}>
                             No Participants Available
                         </h2>
-                        <p style={{ color: '#b4b8e0', marginBottom: '1.5rem' }}>
-                            Upload CSV file with participant data to start the Mega Draw
+                        <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+                            Upload CSV file with participant data to start the Lucky Draw
                         </p>
                         <a href="/upload" className="btn btn-gold">
                             Upload Participants
@@ -143,14 +366,22 @@ const Dashboard = () => {
                             flexWrap: 'wrap',
                             gap: '1rem'
                         }}>
-                            <h2 style={{ color: '#e0e7ff', fontSize: '1.5rem', margin: 0 }}>
+                            <h2 style={{ color: '#FFD700', fontSize: '1.5rem', margin: 0 }}>
                                 Winners List ({drawHistory.length})
                             </h2>
                             <button
                                 onClick={exportWinners}
-                                className="btn btn-gold"
+                                style={{
+                                    background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                    color: '#000',
+                                    padding: '0.75rem 1.5rem',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontWeight: 'bold'
+                                }}
                             >
-                                Export Winners
+                                📥 Export Winners
                             </button>
                         </div>
 
@@ -159,8 +390,8 @@ const Dashboard = () => {
                                 <div
                                     key={entry.id}
                                     style={{
-                                        background: 'rgba(107, 141, 255, 0.1)',
-                                        border: '1px solid rgba(107, 141, 255, 0.25)',
+                                        background: 'rgba(255, 255, 255, 0.95)',
+                                        border: '1px solid #FFD700',
                                         borderRadius: '10px',
                                         padding: '1.25rem'
                                     }}
@@ -174,29 +405,29 @@ const Dashboard = () => {
                                         <div>
                                             <h4 style={{
                                                 fontSize: '1.05rem',
-                                                color: '#e0e7ff',
+                                                color: '#333',
                                                 margin: '0 0 0.5rem 0'
                                             }}>
                                                 {entry.winner.fullName}
                                             </h4>
                                             <p style={{
                                                 fontSize: '0.9rem',
-                                                color: '#b4b8e0',
+                                                color: '#666',
                                                 margin: '0.25rem 0'
                                             }}>
                                                 {entry.winner.phone}
                                             </p>
                                             <p style={{
                                                 fontSize: '0.9rem',
-                                                color: '#b4b8e0',
+                                                color: '#666',
                                                 margin: '0.25rem 0'
                                             }}>
                                                 {entry.winner.divisonalOffice}
                                             </p>
                                         </div>
                                         <span style={{
-                                            background: 'rgba(107, 141, 255, 0.3)',
-                                            color: '#a5baff',
+                                            background: '#FFD700',
+                                            color: '#000',
                                             padding: '0.4rem 0.8rem',
                                             borderRadius: '6px',
                                             fontSize: '0.85rem',
@@ -207,9 +438,9 @@ const Dashboard = () => {
                                     </div>
                                     <div style={{
                                         fontSize: '0.85rem',
-                                        color: '#8b90b8',
+                                        color: '#999',
                                         paddingTop: '0.75rem',
-                                        borderTop: '1px solid rgba(107, 141, 255, 0.15)'
+                                        borderTop: '1px solid rgba(255, 215, 0, 0.3)'
                                     }}>
                                         {entry.date} • {entry.time}
                                     </div>
@@ -229,80 +460,115 @@ const Dashboard = () => {
                         left: 0,
                         width: '100%',
                         height: '100%',
-                        background: 'rgba(0, 0, 0, 0.7)',
-                        backdropFilter: 'blur(5px)',
+                        background: 'rgba(0, 0, 0, 0.85)',
+                        backdropFilter: 'blur(8px)',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        zIndex: 1000
+                        zIndex: 1000,
+                        animation: 'fadeIn 0.3s ease'
                     }}
                     onClick={closeModal}
                 >
                     <div
                         style={{
-                            background: 'rgba(30, 58, 138, 0.95)',
-                            border: '2px solid rgba(59, 130, 246, 0.3)',
-                            borderRadius: '16px',
-                            padding: '2rem',
-                            maxWidth: '500px',
+                            background: 'linear-gradient(135deg, #8B0000 0%, #B22222 100%)',
+                            border: '4px solid #FFD700',
+                            borderRadius: '20px',
+                            padding: '3rem 2rem',
+                            maxWidth: '600px',
                             width: '90%',
                             textAlign: 'center',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
+                        {/* Confetti effect */}
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'radial-gradient(circle at 50% 50%, rgba(255,215,0,0.1) 0%, transparent 70%)',
+                            pointerEvents: 'none'
+                        }}></div>
+
                         <h2 style={{
-                            fontSize: '1.8rem',
-                            color: '#e0e7ff',
-                            marginBottom: '1rem'
+                            fontSize: '3rem',
+                            color: '#FFD700',
+                            marginBottom: '1rem',
+                            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                            animation: 'bounce 0.6s ease'
                         }}>
-                            Congratulations!
+                            CONGRATULATIONS!
                         </h2>
 
                         <div style={{
-                            fontSize: '1.8rem',
-                            color: '#a5baff',
+                            fontSize: '4rem',
+                            color: '#fff',
                             fontWeight: 'bold',
-                            marginBottom: '1.5rem'
+                            marginBottom: '2rem',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
                         }}>
-                            {currentWinner.fullName}
+                            🎫 {currentWinner.ticketNumber}
                         </div>
 
                         <div style={{
-                            background: 'rgba(107, 141, 255, 0.1)',
-                            border: '1px solid rgba(107, 141, 255, 0.25)',
-                            borderRadius: '10px',
-                            padding: '1.25rem',
-                            marginBottom: '1.5rem',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            border: '2px solid #FFD700',
+                            borderRadius: '12px',
+                            padding: '1.5rem',
+                            marginBottom: '2rem',
                             textAlign: 'left'
                         }}>
-                            <div style={{ color: '#b4b8e0', marginBottom: '0.5rem' }}>
-                                {currentWinner.phone}
+                            <div style={{ color: '#333', marginBottom: '0.75rem', fontSize: '1.1rem' }}>
+                                📞 <strong>Phone:</strong> {currentWinner.phone}
                             </div>
-                            <div style={{ color: '#b4b8e0' }}>
-                                {currentWinner.divisonalOffice}
-                            </div>
-                            <div style={{
-                                color: '#a5baff',
-                                fontWeight: '600',
-                                marginTop: '0.75rem',
-                                paddingTop: '0.75rem',
-                                borderTop: '1px solid rgba(107, 141, 255, 0.2)'
-                            }}>
-                                Ticket: {currentWinner.ticketNumber}
+                            <div style={{ color: '#333', marginBottom: '0.75rem', fontSize: '1.1rem' }}>
+                                🏢 <strong>Office:</strong> {currentWinner.divisonalOffice}
                             </div>
                         </div>
 
                         <button
                             onClick={closeModal}
-                            className="btn btn-gold"
-                            style={{ width: '100%' }}
+                            style={{
+                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                color: '#000',
+                                padding: '1rem 3rem',
+                                border: 'none',
+                                borderRadius: '50px',
+                                cursor: 'pointer',
+                                fontSize: '1.1rem',
+                                fontWeight: 'bold',
+                                width: '100%',
+                                boxShadow: '0 4px 15px rgba(255,215,0,0.4)'
+                            }}
                         >
                             Close
                         </button>
                     </div>
                 </div>
             )}
+
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px); }
+                    50% { transform: translateY(-10px); }
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                @keyframes bounce {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.1); }
+                }
+            `}</style>
         </div>
     );
 };

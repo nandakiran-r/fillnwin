@@ -3,7 +3,7 @@ import { isAuthenticated } from './utils/auth';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
-import MegaDraw from './pages/MegaDraw';
+
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Wrapper component to prevent infinite re-renders
@@ -35,14 +35,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/mega-draw"
-          element={
-            <ProtectedRoute>
-              <MegaDraw />
-            </ProtectedRoute>
-          }
-        />
+
 
         <Route
           path="*"
