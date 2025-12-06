@@ -7,7 +7,7 @@ import * as IDB from './idb.js';
  * Vehicle Type, SAP Code, Retail Outlet Name, RSA, Divisonal Office, 
  * Submission Date & Time, Ticket Number
  * 
- * Required fields: Full Name, Phone, Divisonal Office, Ticket Number
+ * Required fields: Phone, Divisonal Office, Ticket Number
  * All other fields are optional
  */
 export const parseCSV = (file) => {
@@ -20,13 +20,13 @@ export const parseCSV = (file) => {
                     // Validate and transform data
                     const participants = results.data.map((row, index) => {
                         // Check if row has required fields
-                        const fullName = row['Full Name']?.trim();
+                        const fullName = row['Full Name']?.trim() || '';
                         const phone = row['Phone']?.trim();
                         const divisonalOffice = row['Divisonal Office']?.trim();
                         const ticketNumber = row['Ticket Number']?.trim();
 
-                        if (!fullName || !phone || !divisonalOffice || !ticketNumber) {
-                            throw new Error(`Row ${index + 1} is missing required fields (Full Name, Phone, Divisonal Office, or Ticket Number)`);
+                        if (!phone || !divisonalOffice || !ticketNumber) {
+                            throw new Error(`Row ${index + 1} is missing required fields (Phone, Divisonal Office, or Ticket Number)`);
                         }
 
                         return {
@@ -114,12 +114,12 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
 
                         try {
                             const chunk = results.data.map((row, index) => {
-                                const fullName = row['Full Name']?.trim();
+                                const fullName = row['Full Name']?.trim() || '';
                                 const phone = row['Phone']?.trim();
                                 const divisonalOffice = row['Divisonal Office']?.trim();
                                 const ticketNumber = row['Ticket Number']?.trim();
 
-                                if (!fullName || !phone || !divisonalOffice || !ticketNumber) {
+                                if (!phone || !divisonalOffice || !ticketNumber) {
                                     errors.push(`Row ${processedRows + index + 1}: Missing required fields`);
                                     return null;
                                 }

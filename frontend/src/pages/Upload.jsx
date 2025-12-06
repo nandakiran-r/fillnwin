@@ -229,8 +229,8 @@ const Upload = () => {
                             color: 'var(--text-secondary)'
                         }}>
                             <strong style={{ color: 'var(--festive-gold)' }}>CSV Format:</strong><br />
-                            <strong>Required columns:</strong> Full Name, Phone, Divisonal Office, Ticket Number<br />
-                            <strong>Optional columns:</strong> Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time<br />
+                            <strong>Required columns:</strong> Phone, Divisonal Office, Ticket Number<br />
+                            <strong>Optional columns:</strong> Full Name, Bill Receipt, Vehicle Registration Number, Vehicle Type, SAP Code, Retail Outlet Name, RSA, Submission Date & Time<br />
                             <br />
                             <strong style={{ color: 'var(--festive-gold)' }}>📍 Note:</strong> Data is stored locally in your browser using IndexedDB
                         </div>

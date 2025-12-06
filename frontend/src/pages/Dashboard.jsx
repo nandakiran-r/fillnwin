@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { getParticipants, removeParticipant, getDrawHistory, addDrawToHistory, getStats, exportWinnersByPrize } from '../utils/storage';
+import confetti from 'canvas-confetti';
 
 const Dashboard = () => {
     const [participants, setParticipants] = useState([]);
@@ -68,6 +69,56 @@ const Dashboard = () => {
             setCurrentWinner(winner);
             setShowWinnerModal(true);
             setIsDrawing(prev => ({ ...prev, [prizeType]: false }));
+
+            // Fire confetti from sides - continuous effect with vibrant colors
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00']; // Red, Green, Blue, Yellow
+
+            // Create or get confetti canvas with high z-index
+            let confettiCanvas = document.getElementById('confetti-canvas');
+            if (!confettiCanvas) {
+                confettiCanvas = document.createElement('canvas');
+                confettiCanvas.id = 'confetti-canvas';
+                confettiCanvas.style.position = 'fixed';
+                confettiCanvas.style.top = '0';
+                confettiCanvas.style.left = '0';
+                confettiCanvas.style.width = '100%';
+                confettiCanvas.style.height = '100%';
+                confettiCanvas.style.pointerEvents = 'none';
+                confettiCanvas.style.zIndex = '10000'; // Above modal (z-index: 1000)
+                document.body.appendChild(confettiCanvas);
+            }
+
+            const myConfetti = confetti.create(confettiCanvas, { resize: true });
+
+            // Continuous side cannons effect for 3 seconds
+            const end = Date.now() + 3 * 1000; // 3 seconds
+            const frame = () => {
+                if (Date.now() > end) return;
+
+                // Left side cannon
+                myConfetti({
+                    particleCount: 2,
+                    angle: 60,
+                    spread: 55,
+                    startVelocity: 60,
+                    origin: { x: 0, y: 0.5 },
+                    colors: colors
+                });
+
+                // Right side cannon
+                myConfetti({
+                    particleCount: 2,
+                    angle: 120,
+                    spread: 55,
+                    startVelocity: 60,
+                    origin: { x: 1, y: 0.5 },
+                    colors: colors
+                });
+
+                requestAnimationFrame(frame);
+            };
+
+            frame();
 
             setTimeout(async () => {
                 await loadData();
