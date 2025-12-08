@@ -96,13 +96,43 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
         const errors = [];
         const sapCodesSet = new Set();
 
-        // First pass: count total rows
+        // First pass: validate for duplicates within CSV
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            preview: 0, // Parse all to count
-            complete: (countResult) => {
-                totalRows = countResult.data.length;
+            complete: (validationResult) => {
+                // Check for duplicate ticket numbers within the CSV
+                const ticketNumberMap = new Map();
+                const duplicateTickets = new Map();
+
+                validationResult.data.forEach((row, index) => {
+                    const ticketNumber = row['Ticket Number']?.trim();
+                    if (ticketNumber) {
+                        if (ticketNumberMap.has(ticketNumber)) {
+                            // Found a duplicate
+                            if (!duplicateTickets.has(ticketNumber)) {
+                                duplicateTickets.set(ticketNumber, [ticketNumberMap.get(ticketNumber)]);
+                            }
+                            duplicateTickets.get(ticketNumber).push(index + 2); // +2 because index is 0-based and we skip header
+                        } else {
+                            ticketNumberMap.set(ticketNumber, index + 2); // Store row number (1-indexed + header)
+                        }
+                    }
+                });
+
+                // If duplicates found, reject with detailed error message
+                if (duplicateTickets.size > 0) {
+                    const duplicateList = Array.from(duplicateTickets.entries())
+                        .map(([ticket, rows]) => `  • Ticket "${ticket}" appears in rows: ${rows.join(', ')}`)
+                        .join('\n');
+
+                    reject(new Error(
+                        `Duplicate ticket numbers found in CSV file:\n\n${duplicateList}\n\nPlease remove duplicates and try again.`
+                    ));
+                    return;
+                }
+
+                totalRows = validationResult.data.length;
 
                 // Second pass: process in chunks
                 Papa.parse(file, {
@@ -202,7 +232,7 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
                 });
             },
             error: (error) => {
-                reject(new Error(`Failed to count CSV rows: ${error.message}`));
+                reject(new Error(`Failed to validate CSV: ${error.message}`));
             }
         });
     });

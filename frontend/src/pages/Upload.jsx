@@ -137,7 +137,7 @@ const Upload = () => {
                 </div>
 
                 {message && (
-                    <div className={`alert alert-${message.type} fade-in`}>
+                    <div className={`alert alert-${message.type} fade-in`} style={{ whiteSpace: 'pre-line' }}>
                         {message.text}
                     </div>
                 )}
