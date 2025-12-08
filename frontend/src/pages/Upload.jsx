@@ -9,6 +9,8 @@ const Upload = () => {
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(null);
+    const [uploadErrors, setUploadErrors] = useState(null);
+    const [showAllErrors, setShowAllErrors] = useState(false);
     const fileInputRef = useRef(null);
 
     // Load participants on mount
@@ -49,6 +51,8 @@ const Upload = () => {
     const handleFile = async (file) => {
         setMessage(null);
         setUploadProgress(null);
+        setUploadErrors(null);
+        setShowAllErrors(false);
 
         const validation = validateCSVFile(file);
         if (!validation.valid) {
@@ -79,14 +83,18 @@ const Upload = () => {
             const updatedParticipants = await getParticipants();
             setParticipants(updatedParticipants);
 
-            setMessage({
-                type: 'success',
-                text: `✅ Successfully uploaded ${result.count} participants${result.errors ? ` (${result.errors.length} errors)` : ''}`
-            });
-
-            // Show errors if any
+            // Set message based on errors
             if (result.errors && result.errors.length > 0) {
-                console.warn('Upload errors:', result.errors);
+                setMessage({
+                    type: 'warning',
+                    text: `⚠️ Upload completed with issues: ${result.count} participants added, ${result.errors.length} rows had errors`
+                });
+                setUploadErrors(result.errors);
+            } else {
+                setMessage({
+                    type: 'success',
+                    text: `✅ Successfully uploaded ${result.count} participants`
+                });
             }
         } catch (error) {
             setMessage({ type: 'error', text: error.message });
@@ -139,6 +147,78 @@ const Upload = () => {
                 {message && (
                     <div className={`alert alert-${message.type} fade-in`} style={{ whiteSpace: 'pre-line' }}>
                         {message.text}
+                    </div>
+                )}
+
+                {/* Error List Display */}
+                {uploadErrors && uploadErrors.length > 0 && (
+                    <div className="festive-card" style={{
+                        marginBottom: '1.5rem',
+                        background: 'rgba(255, 193, 7, 0.1)',
+                        border: '1px solid rgba(255, 193, 7, 0.3)'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '1rem'
+                        }}>
+                            <h4 style={{
+                                color: 'var(--festive-gold)',
+                                margin: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                ⚠️ Upload Errors ({uploadErrors.length})
+                            </h4>
+                            {uploadErrors.length > 100 && (
+                                <button
+                                    onClick={() => setShowAllErrors(!showAllErrors)}
+                                    className="btn btn-outline"
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        fontSize: '0.85rem'
+                                    }}
+                                >
+                                    {showAllErrors ? 'Show Less' : `Show All (${uploadErrors.length})`}
+                                </button>
+                            )}
+                        </div>
+                        <div style={{
+                            maxHeight: '300px',
+                            overflowY: 'auto',
+                            background: 'rgba(0, 0, 0, 0.3)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '1rem'
+                        }}>
+                            {(showAllErrors ? uploadErrors : uploadErrors.slice(0, 100)).map((error, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        padding: '0.5rem',
+                                        marginBottom: '0.25rem',
+                                        background: 'rgba(255, 255, 255, 0.05)',
+                                        borderRadius: '4px',
+                                        fontSize: '0.9rem',
+                                        color: 'var(--text-secondary)',
+                                        fontFamily: 'monospace'
+                                    }}
+                                >
+                                    {error}
+                                </div>
+                            ))}
+                            {!showAllErrors && uploadErrors.length > 100 && (
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '0.75rem',
+                                    color: 'var(--text-muted)',
+                                    fontSize: '0.85rem'
+                                }}>
+                                    ... and {uploadErrors.length - 100} more errors
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
 
