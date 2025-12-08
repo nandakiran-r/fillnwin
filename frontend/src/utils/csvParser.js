@@ -150,7 +150,11 @@ export const parseCSVChunked = (file, onProgress = null, chunkSize = 1000) => {
                                 const ticketNumber = row['Ticket Number']?.trim();
 
                                 if (!phone || !divisonalOffice || !ticketNumber) {
-                                    errors.push(`Row ${processedRows + index + 1}: Missing required fields`);
+                                    const missingFields = [];
+                                    if (!phone) missingFields.push('Phone');
+                                    if (!divisonalOffice) missingFields.push('Divisonal Office');
+                                    if (!ticketNumber) missingFields.push('Ticket Number');
+                                    errors.push(`Row ${processedRows + index + 2}: Missing required field(s): ${missingFields.join(', ')}`);
                                     return null;
                                 }
 
