@@ -19,18 +19,13 @@ const CouponDraw = () => {
         const p = await getParticipants();
         setParticipants(p);
 
-        // Load SAP Codes from localStorage
-        try {
-            const storedSapCodes = localStorage.getItem('SAPCODES');
-            if (storedSapCodes) {
-                const parsedCodes = JSON.parse(storedSapCodes);
-                if (Array.isArray(parsedCodes)) {
-                    setSapCodes(parsedCodes);
-                }
-            }
-        } catch (error) {
-            console.error('Error loading SAPCODES from localStorage', error);
-        }
+        // Derive unique SAP codes from actual participant data
+        // Only SAP codes that have matching participants are "correctly configured"
+        const uniqueCodes = [...new Set(
+            p.filter(part => part.sapCode && part.sapCode.trim().length > 0)
+                .map(part => part.sapCode.trim())
+        )];
+        setSapCodes(uniqueCodes);
     };
 
     const handleDraw = async () => {
@@ -266,7 +261,7 @@ const CouponDraw = () => {
                                             </>
                                         ) : (
                                             <div style={{ fontSize: '1.2rem', color: '#9ca3af', fontStyle: 'italic' }}>
-                                                {sapCodes.length} SAP Codes Configured
+                                                {sapCodes.length} Unique SAP Codes
                                             </div>
                                         )}
                                     </div>
