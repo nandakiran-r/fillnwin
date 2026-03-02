@@ -230,13 +230,13 @@ const Dashboard = () => {
         const displayedTicket = lastDrawnTicket[prizeType];
         const prizeWinners = drawHistory.filter(entry => entry.winner.prizeRank === prize.name);
         const colorMap = {
-            first: '#FFD700',
-            second: '#e5e7eb',
+            first: '#fbbf24',
+            second: '#fbbf24',
             third: '#fbbf24',
-            fourth: '#34d399',
-            fifth: '#f472b6',
-            sixth: '#60a5fa',
-            seventh: '#c084fc'
+            fourth: '#fbbf24',
+            fifth: '#fbbf24',
+            sixth: '#fbbf24',
+            seventh: '#fbbf24'
         };
         const prizeColor = colorMap[prizeType] || '#FFD700';
         const isBulkDraw = ['second', 'third', 'fifth', 'sixth', 'seventh'].includes(prizeType);
