@@ -9,21 +9,31 @@ const Dashboard = () => {
     const [stats, setStats] = useState({ totalParticipants: 0, totalDraws: 0, remainingParticipants: 0 });
     const [showWinnerModal, setShowWinnerModal] = useState(false);
     const [currentWinner, setCurrentWinner] = useState(null);
-    const [isDrawing, setIsDrawing] = useState({ first: false, second: false, third: false });
+    const [isDrawing, setIsDrawing] = useState({ first: false, second: false, third: false, fourth: false, fifth: false, sixth: false, seventh: false });
     const [lastDrawnTicket, setLastDrawnTicket] = useState({
         first: 'XXX-XXX',
         second: 'XXX-XXX',
-        third: 'XXX-XXX'
+        third: 'XXX-XXX',
+        fourth: 'XXX-XXX',
+        fifth: 'XXX-XXX',
+        sixth: 'XXX-XXX',
+        seventh: 'XXX-XXX'
     });
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkWinners, setBulkWinners] = useState([]);
+    const [bulkModalTitle, setBulkModalTitle] = useState('3rd Prize');
+    const [bulkModalCount, setBulkModalCount] = useState(25);
 
 
     // Prize configurations
     const prizes = {
         first: { name: '1st Prize', title: 'MARUTI SUZUKI SWIFT', subtitle: 'LXI 1.2L (SS SMT)', image: '/swift-car.png' },
         second: { name: '2nd Prize', title: 'HONDA ACTIVA 125', subtitle: 'Two Wheeler', image: '/scooter-image.png' },
-        third: { name: '3rd Prize', title: 'VIVO Y19 5G', subtitle: 'Latest Model', image: '/phone-image.png' }
+        third: { name: '3rd Prize', title: 'VIVO Y19 5G', subtitle: 'Latest Model', image: '/phone-image.png' },
+        fourth: { name: 'Free Borophene Self-Healing Coating', title: 'BOROPHENE SELF-HEALING COATING', subtitle: 'Free Coating', image: '/borophene-coating.png' },
+        fifth: { name: '25% Discount Voucher', title: '25% DISCOUNT VOUCHERS ON BOROPHENE SELF-HEALING COATING', subtitle: 'On Borophene Self-Healing Coating', image: '/discount-voucher.png' },
+        sixth: { name: 'Free Meta Marketing Course', title: 'FREE META MARKETING COURSE', subtitle: 'Professional Certification', image: '/meta-course.png' },
+        seventh: { name: '20% Discount Coupon', title: '20% DISCOUNT COUPONS ON ALL COURSES', subtitle: 'On All Courses', image: '/discount-20-voucher.png' }
     };
 
     useEffect(() => {
@@ -128,29 +138,28 @@ const Dashboard = () => {
         }, 2000);
     };
 
-    // Special handler for 3rd Prize: select 25 winners at once
-    const handleDrawThird = async () => {
+    // Generic multi-winner handler: select COUNT winners at once
+    const handleBulkDraw = async (prizeType, count, prizeLabel) => {
         if (participants.length === 0) {
             alert('No participants available for draw');
             return;
         }
 
-        const COUNT = 25;
-        if (participants.length < COUNT) {
-            alert(`Not enough participants. Need at least ${COUNT}, only ${participants.length} remaining.`);
+        if (participants.length < count) {
+            alert(`Not enough participants. Need at least ${count}, only ${participants.length} remaining.`);
             return;
         }
 
-        setIsDrawing(prev => ({ ...prev, third: true }));
+        setIsDrawing(prev => ({ ...prev, [prizeType]: true }));
 
         setTimeout(async () => {
-            // Shuffle a copy and pick first 25
+            // Shuffle a copy and pick first COUNT
             const pool = [...participants];
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
             }
-            const selected = pool.slice(0, COUNT).map(p => ({ ...p, prizeRank: '3rd Prize' }));
+            const selected = pool.slice(0, count).map(p => ({ ...p, prizeRank: prizeLabel }));
 
             // Persist each winner
             for (const winner of selected) {
@@ -159,8 +168,10 @@ const Dashboard = () => {
             }
 
             setBulkWinners(selected);
+            setBulkModalTitle(prizeLabel);
+            setBulkModalCount(count);
             setShowBulkModal(true);
-            setIsDrawing(prev => ({ ...prev, third: false }));
+            setIsDrawing(prev => ({ ...prev, [prizeType]: false }));
 
             // Confetti
             const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'];
@@ -191,10 +202,26 @@ const Dashboard = () => {
         }, 2000);
     };
 
+    // Convenience wrappers (batchSize of 10 for 100-winner draws)
+    const handleDrawSecond = () => handleBulkDraw('second', 2, '2nd Prize');
+    const handleDrawThird = () => handleBulkDraw('third', 25, '3rd Prize');
+    const handleDrawFifth = () => handleBulkDraw('fifth', 100, '25% Discount Voucher');
+    const handleDrawSixth = () => handleBulkDraw('sixth', 2, 'Free Meta Marketing Course');
+    const handleDrawSeventh = () => handleBulkDraw('seventh', 100, '20% Discount Coupon');
+
 
     const closeModal = () => {
         setShowWinnerModal(false);
         setCurrentWinner(null);
+    };
+
+    // Map prize types to their bulk handlers
+    const bulkHandlers = {
+        second: handleDrawSecond,
+        third: handleDrawThird,
+        fifth: handleDrawFifth,
+        sixth: handleDrawSixth,
+        seventh: handleDrawSeventh
     };
 
     const renderPrizeCard = (prizeType) => {
@@ -202,7 +229,17 @@ const Dashboard = () => {
         const drawing = isDrawing[prizeType];
         const displayedTicket = lastDrawnTicket[prizeType];
         const prizeWinners = drawHistory.filter(entry => entry.winner.prizeRank === prize.name);
-        const prizeColor = prizeType === 'first' ? '#FFD700' : prizeType === 'second' ? '#e5e7eb' : '#fbbf24';
+        const colorMap = {
+            first: '#FFD700',
+            second: '#e5e7eb',
+            third: '#fbbf24',
+            fourth: '#34d399',
+            fifth: '#f472b6',
+            sixth: '#60a5fa',
+            seventh: '#c084fc'
+        };
+        const prizeColor = colorMap[prizeType] || '#FFD700';
+        const isBulkDraw = ['second', 'third', 'fifth', 'sixth', 'seventh'].includes(prizeType);
 
         return (
             <div key={prizeType} style={{
@@ -332,7 +369,7 @@ const Dashboard = () => {
 
                         {/* Draw Button */}
                         <button
-                            onClick={() => prizeType === 'third' ? handleDrawThird() : handleDraw(prizeType)}
+                            onClick={() => isBulkDraw ? bulkHandlers[prizeType]() : handleDraw(prizeType)}
                             disabled={drawing}
                             style={{
                                 background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
@@ -401,7 +438,7 @@ const Dashboard = () => {
                                 marginBottom: 0,
                                 fontWeight: '700'
                             }}>
-                                {prizeType === 'first' ? '🥇' : prizeType === 'second' ? '🥈' : '🥉'} Winners ({prizeWinners.length})
+                                {prizeType === 'first' ? '🥇' : prizeType === 'second' ? '🥈' : prizeType === 'third' ? '🥉' : '🏆'} Winners ({prizeWinners.length})
                             </h4>
                             {prizeWinners.length > 0 && (
                                 <button
@@ -557,6 +594,10 @@ const Dashboard = () => {
                         {renderPrizeCard('first')}
                         {renderPrizeCard('second')}
                         {renderPrizeCard('third')}
+                        {renderPrizeCard('fourth')}
+                        {renderPrizeCard('fifth')}
+                        {renderPrizeCard('sixth')}
+                        {renderPrizeCard('seventh')}
                     </div>
                 )}
 
@@ -809,8 +850,8 @@ const Dashboard = () => {
                         <div style={{ textAlign: 'center', marginBottom: '1.25rem', paddingTop: '0.5rem' }}>
                             <img src="/indian-oil-logo.png" alt="Indian Oil" style={{ height: '45px', marginBottom: '0.75rem', filter: 'drop-shadow(0 2px 8px rgba(255,255,255,0.3))' }} />
                             <h2 style={{ fontSize: '1.8rem', color: '#fff', margin: '0 0 0.25rem', fontWeight: '700', textTransform: 'uppercase' }}>Congratulations!</h2>
-                            <p style={{ color: '#bfdbfe', fontSize: '0.9rem', margin: 0 }}>3rd Prize — 25 Lucky Winners</p>
-                            <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: '700', margin: '0.25rem 0 0', textTransform: 'uppercase' }}>🥉 VIVO Y19 5G</p>
+                            <p style={{ color: '#bfdbfe', fontSize: '0.9rem', margin: 0 }}>{bulkModalTitle} — {bulkModalCount} Lucky Winners</p>
+                            <p style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: '700', margin: '0.25rem 0 0', textTransform: 'uppercase' }}>🏆 {bulkModalTitle}</p>
                         </div>
 
                         {/* Winners Grid — scrollable */}
