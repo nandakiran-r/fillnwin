@@ -203,7 +203,7 @@ const Dashboard = () => {
     };
 
     // Convenience wrappers (batchSize of 10 for 100-winner draws)
-    const handleDrawSecond = () => handleBulkDraw('second', 2, '2nd Prize');
+    const handleDrawSecond = () => handleBulkDraw('second', 3, '2nd Prize');
     const handleDrawThird = () => handleBulkDraw('third', 25, '3rd Prize');
     const handleDrawFifth = () => handleBulkDraw('fifth', 100, '25% Discount Voucher');
     const handleDrawSixth = () => handleBulkDraw('sixth', 2, 'Free Meta Marketing Course');
