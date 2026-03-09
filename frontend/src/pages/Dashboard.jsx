@@ -202,10 +202,22 @@ const Dashboard = () => {
         }, 2000);
     };
 
+    // Prize winner limits
+    const prizeLimits = { fifth: 100 };
+
     // Convenience wrappers (batchSize of 10 for 100-winner draws)
     const handleDrawSecond = () => handleBulkDraw('second', 3, '2nd Prize');
     const handleDrawThird = () => handleBulkDraw('third', 25, '3rd Prize');
-    const handleDrawFifth = () => handleBulkDraw('fifth', 100, '25% Discount Voucher');
+    const handleDrawFifth = () => {
+        const existingWinners = drawHistory.filter(entry => entry.winner.prizeRank === '25% Discount Voucher').length;
+        const remaining = prizeLimits.fifth - existingWinners;
+        if (remaining <= 0) {
+            alert('5th Prize limit of 100 winners has been reached!');
+            return;
+        }
+        const count = Math.min(remaining, 100);
+        handleBulkDraw('fifth', count, '25% Discount Voucher');
+    };
     const handleDrawSixth = () => handleBulkDraw('sixth', 2, 'Free Meta Marketing Course');
     const handleDrawSeventh = () => handleBulkDraw('seventh', 100, '20% Discount Coupon');
 
@@ -240,6 +252,7 @@ const Dashboard = () => {
         };
         const prizeColor = colorMap[prizeType] || '#FFD700';
         const isBulkDraw = ['second', 'third', 'fifth', 'sixth', 'seventh'].includes(prizeType);
+        const prizeLimitReached = prizeLimits[prizeType] ? prizeWinners.length >= prizeLimits[prizeType] : false;
 
         return (
             <div key={prizeType} style={{
@@ -370,39 +383,39 @@ const Dashboard = () => {
                         {/* Draw Button */}
                         <button
                             onClick={() => isBulkDraw ? bulkHandlers[prizeType]() : handleDraw(prizeType)}
-                            disabled={drawing}
+                            disabled={drawing || prizeLimitReached}
                             style={{
-                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-                                color: '#000',
+                                background: prizeLimitReached ? 'linear-gradient(135deg, #888 0%, #666 100%)' : 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                                color: prizeLimitReached ? '#ccc' : '#000',
                                 fontSize: '1.3rem',
                                 fontWeight: 'bold',
                                 padding: '1rem 3rem',
                                 border: 'none',
                                 borderRadius: '50px',
-                                cursor: drawing ? 'not-allowed' : 'pointer',
-                                boxShadow: '0 6px 20px rgba(255, 215, 0, 0.5)',
+                                cursor: (drawing || prizeLimitReached) ? 'not-allowed' : 'pointer',
+                                boxShadow: prizeLimitReached ? 'none' : '0 6px 20px rgba(255, 215, 0, 0.5)',
                                 transition: 'all 0.3s ease',
                                 textTransform: 'uppercase',
                                 letterSpacing: '2px',
-                                opacity: drawing ? 0.6 : 1,
+                                opacity: (drawing || prizeLimitReached) ? 0.6 : 1,
                                 transform: drawing ? 'scale(0.95)' : 'scale(1)',
                                 position: 'relative',
                                 overflow: 'hidden'
                             }}
                             onMouseEnter={(e) => {
-                                if (!drawing) {
+                                if (!drawing && !prizeLimitReached) {
                                     e.target.style.transform = 'scale(1.05)';
                                     e.target.style.boxShadow = '0 8px 25px rgba(255, 215, 0, 0.7)';
                                 }
                             }}
                             onMouseLeave={(e) => {
-                                if (!drawing) {
+                                if (!drawing && !prizeLimitReached) {
                                     e.target.style.transform = 'scale(1)';
                                     e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.5)';
                                 }
                             }}
                         >
-                            {drawing ? '🎰 DRAWING...' : '🎲 DRAW'}
+                            {prizeLimitReached ? '✅ LIMIT REACHED (100)' : drawing ? '🎰 DRAWING...' : '🎲 DRAW'}
                         </button>
 
                         <p style={{
@@ -939,3 +952,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
